@@ -1,26 +1,18 @@
 package entity;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ForkJoinPool;
 
 public class ApplicationProperties {
-	public static final ExecutorService pool=Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+4);
-	
+	public static final ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() + 4);
+		
 	private static String starListUrl;
 	private static String area;
 	private static String sex;
 	private static String baidu;
 	private static List<String> starsList;
-	
-	private static ConcurrentMap<String, String> imageMap=new ConcurrentHashMap<>();//已下载
-	private static BlockingQueue<String> waitToDownLoad=new LinkedBlockingQueue<>();
-	
+	private static String downloadFilePath;
+		
 	public static String getStarListUrl() {
 		return starListUrl;
 	}
@@ -51,16 +43,11 @@ public class ApplicationProperties {
 	public static void setStarsList(List<String> starsList) {
 		ApplicationProperties.starsList = starsList;
 	}
-	public static ConcurrentMap<String, String> getImageMap() {
-		return imageMap;
+	
+	public static String getDownloadFilePath() {
+		return downloadFilePath;
 	}
-	public static void setImageMap(ConcurrentMap<String, String> imageMap) {
-		ApplicationProperties.imageMap = imageMap;
-	}
-	public static BlockingQueue<String> getWaitToDownLoad() {
-		return waitToDownLoad;
-	}
-	public static void setWaitToDownLoad(BlockingQueue<String> waitToDownLoad) {
-		ApplicationProperties.waitToDownLoad = waitToDownLoad;
+	public static void setDownloadFilePath(String downloadFilePath) {
+		ApplicationProperties.downloadFilePath = downloadFilePath;
 	}
 }

@@ -52,10 +52,10 @@ public class HttpUtils {
           
             //创建httpGet对象
             HttpGet hg = new HttpGet(uri.build());
-            //设置请求的报文头部的编码
-            hg.setHeader(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
-            //设置期望服务端返回的编码
-            hg.setHeader(new BasicHeader("Accept", "text/json;charset=utf-8"));
+//            //设置请求的报文头部的编码
+//            hg.setHeader(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
+//            //设置期望服务端返回的编码
+//            hg.setHeader(new BasicHeader("Accept", "text/json;charset=utf-8"));
             //请求服务
             CloseableHttpResponse response = httpClient.execute(hg);
 

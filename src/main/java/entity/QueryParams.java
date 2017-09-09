@@ -1,7 +1,7 @@
 package entity;
 
 public class QueryParams {
-	private int type;
+	private int type;//1获取名单  2获取图片路径与数量等信息
 	private int pn;
 	private int rn;
 	private String area;

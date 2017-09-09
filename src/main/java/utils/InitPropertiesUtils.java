@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import entity.ApplicationProperties;
 import entity.QueryParams;
+import net.sf.json.JSONObject;
 
 public class InitPropertiesUtils {
 	
@@ -28,6 +29,7 @@ public class InitPropertiesUtils {
 		ApplicationProperties.setArea(properties.getProperty("area").toString());
 		ApplicationProperties.setSex(properties.getProperty("sex").toString());
 		ApplicationProperties.setBaidu(properties.getProperty("baidu").toString());
+		ApplicationProperties.setDownloadFilePath(properties.getProperty("downloadFilePath").toString());
 	}
 	
 	/**
@@ -50,5 +52,19 @@ public class InitPropertiesUtils {
 			params.setPn(params.getPn()+subStarsList.size());
 		}while(subStarsList.size()!=0);
 		ApplicationProperties.setStarsList(starsList);
+	}
+	
+	public static int getPicNums4Everyone(String name) {
+		int result=0;
+		QueryParams params=new QueryParams();
+		params.setType(2);
+		params.setPn(0);
+		params.setRn(30);
+		params.setName(name);
+		Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
+		String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters);
+		JSONObject entityJson=JSONObject.fromObject(entityString);
+		result=entityJson.getInt("displayNum");
+		return result;
 	}
 }

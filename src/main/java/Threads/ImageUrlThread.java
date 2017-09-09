@@ -17,25 +17,29 @@ import utils.QueryParamsUtils;
 public class ImageUrlThread implements Callable<Boolean> {
 	
 	private String name;
+	private int pn;
+	private int end;
 	
-	public ImageUrlThread(String name) {
+	public ImageUrlThread(String name,int pn,int end) {
 		this.name=name;
+		this.pn=pn;
+		this.end=end;
 	}
 
 	@Override
 	public Boolean call() throws Exception {
 		QueryParams params=new QueryParams();
 		params.setType(2);
-		params.setPn(0);
-		params.setRn(30);
+		params.setPn(pn);
 		params.setName(name);
-		boolean notEnd=true;
 		do{
+			int rn =Math.min(36, end-params.getPn());
+			params.setRn(rn);
 			Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
 			String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters);
-			notEnd=CommonUtils.parseImageUrl(entityString);
+			CommonUtils.parseImageUrl(entityString);
 			params.setPn(params.getPn()+params.getRn());
-		}while(notEnd);
+		}while(params.getPn()<end);
 		return true;
 	}
 
