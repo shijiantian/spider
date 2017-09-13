@@ -37,7 +37,7 @@ public class ImageUrlThread implements Callable<Boolean> {
 			params.setRn(rn);
 			Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
 			String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters);
-			CommonUtils.parseImageUrl(entityString);
+			CommonUtils.parseBaiduImageUrl(entityString);
 			params.setPn(params.getPn()+params.getRn());
 		}while(params.getPn()<end);
 		return true;

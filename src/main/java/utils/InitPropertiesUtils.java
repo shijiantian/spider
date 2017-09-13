@@ -1,11 +1,14 @@
 package utils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
 
 import entity.ApplicationProperties;
 import entity.QueryParams;
@@ -29,7 +32,11 @@ public class InitPropertiesUtils {
 		ApplicationProperties.setArea(properties.getProperty("area").toString());
 		ApplicationProperties.setSex(properties.getProperty("sex").toString());
 		ApplicationProperties.setBaidu(properties.getProperty("baidu").toString());
-		ApplicationProperties.setDownloadFilePath(properties.getProperty("downloadFilePath").toString());
+		ApplicationProperties.setBing(properties.getProperty("bing").toString());
+		String sexStr=StringUtils.isBlank(ApplicationProperties.getSex())?"全部":ApplicationProperties.getSex();
+		String areaStr=StringUtils.isBlank(ApplicationProperties.getArea())?"全部":ApplicationProperties.getArea();
+		ApplicationProperties.setDownloadFilePath(properties.getProperty("downloadFilePath").toString()+File.separator+sexStr+File.separator+areaStr);
+		ApplicationProperties.setLogFileSavePath(properties.getProperty("logFileSavePath").toString());
 	}
 	
 	/**

@@ -1,7 +1,10 @@
 package utils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.mysql.fabric.xmlrpc.base.Data;
 
 import entity.QueryParams;
 
@@ -33,12 +36,13 @@ public class QueryParamsUtils {
 			params.put("is","");
 			params.put("fp","result");
 			params.put("queryWord","");
-			params.put("cl","2");
-			params.put("lm","-1");
-			params.put("ie","utf-8");
+			params.put("cl","2");//图片搜索
+//			params.put("lm","0");//时间限制
+			params.put("ie","utf-8");//查询关键词的编码
 			params.put("oe","utf-8");
 			params.put("adpicid","");
-			params.put("st","-1");
+//			params.put("st","");
+			params.put("gpc", "stf=1505232000,1505318398|stftype=2");
 			params.put("word",queryParams.getName());
 			params.put("z","");
 			params.put("ic","0");
@@ -54,8 +58,20 @@ public class QueryParamsUtils {
 			params.put("fr","");
 			params.put("step_word",queryParams.getName());
 			params.put("pn",""+queryParams.getPn());
-			params.put("rn",""+queryParams.getRn());
+			params.put("rn",""+queryParams.getRn());//搜索结果显示条数，缺省设置rn=10，取值范围:10-100
 			params.put("gsm","78&1504948216405");
+		case 3:
+			params.put("q",queryParams.getName());
+			params.put("first",""+queryParams.getPn());
+			params.put("count",""+queryParams.getRn());
+			params.put("relo","2");
+			params.put("relp","10");
+			params.put("lostate","c");
+			params.put("mmasync","1");
+			params.put("dgState","c*9_y*1182s1065s1146s1034s970s1014s1020s1051s1177_i*38_w*200");
+			params.put("IG","A81D0C924FFD433CB8684FA28A335D2E");
+			params.put("SFX","2");
+			params.put("iid","images.5753");
 		default:
 			
 			break;

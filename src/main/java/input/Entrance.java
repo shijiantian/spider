@@ -13,9 +13,11 @@ public class Entrance {
 	public static void main(String [] args){
 		//读取配置文件
 		InitPropertiesUtils.initProperties();
-		//从百度获取明星名单
+		//从百度获取名单
 		InitPropertiesUtils.getStarsList();
-		//为每个人创建下载任务
-		DownloadUtil.createDownloadTask();
+		//为每个人创建百度下载任务
+		DownloadUtil.createBaiduDownloadTask();
+		//为每个人创建必应下载任务
+//		DownloadUtil.createBingDownloadTask();
 	}
 }

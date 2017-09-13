@@ -2,8 +2,10 @@ package utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,12 +16,16 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import entity.ApplicationProperties;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class CommonUtils {
+	
 	public static List<String> getStartListJson(String entityString){
 		List<String> result=new ArrayList<>();
 		try {
@@ -49,9 +55,9 @@ public class CommonUtils {
 	 * @param imageMap
 	 * @param entityString
 	 */
-	public static boolean parseImageUrl(String entityString) {
+	public static boolean parseBaiduImageUrl(String entityString) {
 		JSONObject entity=JSONObject.fromObject(entityString);
-		String queryExt=entity.getString("queryExt");
+		String queryExt=new String(entity.getString("queryExt").getBytes(Charset.forName("ISO-8859-1")));
 		JSONArray data=entity.getJSONArray("data");
 		if(data==null||data.isEmpty())
 			return false;
@@ -62,13 +68,29 @@ public class CommonUtils {
 			if(jsonObject==null||jsonObject.isEmpty()||jsonObject.isNullObject())
 				continue;
 			String middleURL=jsonObject.getString("middleURL");
-			String fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+(int)(10000000*Math.random())+middleURL.substring(middleURL.lastIndexOf("."));
+			String fileUrl="";
+			Integer integer=ApplicationProperties.getDownloadedMap().get(middleURL);
+			if(integer!=null&&(integer==0||integer==1)){
+				integer=null;
+				System.out.println("相同图片");
+				continue;
+			}else{
+				integer=null;
+				ApplicationProperties.getDownloadedMap().put(middleURL, 0);
+			}
+			ApplicationProperties.setFileNo(ApplicationProperties.getFileNo()+1);
+			fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+queryExt;
+			File file=new File(fileUrl);
+			if(!file.exists())file.mkdirs();
+			fileUrl=fileUrl+File.separator+ApplicationProperties.getFileNo()+middleURL.substring(middleURL.lastIndexOf("."));
+			
 			downloadFile(middleURL,fileUrl,queryExt);
 		}
 		return true;
 	}
 
 	private static void downloadFile(String urlStr,String fileName,String queryExt){
+		OutputStream outstream=null;
 		try {
             CloseableHttpClient httpClient=HttpClients.createDefault();
             URIBuilder uri=new URIBuilder(urlStr);
@@ -87,13 +109,15 @@ public class CommonUtils {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if(statusCode == 200) {
+            	ApplicationProperties.getDownloadedMap().put(urlStr, 1);
                 //获取返回实例entity
                 HttpEntity entity=response.getEntity();
                 //输出
-                OutputStream outstream=new FileOutputStream(fileName);
+                outstream=new FileOutputStream(fileName);
                 entity.writeTo(outstream);
             }else {
                 //输出
+            	ApplicationProperties.getDownloadedMap().put(urlStr, 0);
                 System.out.println("请求失败!");
             }
 
@@ -102,7 +126,40 @@ public class CommonUtils {
             httpClient.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				outstream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	}
+
+	public static int paseBingHtml(String entityString, String name) {
+		Document doc=Jsoup.parse(entityString);
+		List<Element> elements=doc.getElementsByClass("mimg");
+		elements.stream().forEach(element->{
+			String url=element.attr("src");
+			String fileUrl="";
+			Integer integer=ApplicationProperties.getDownloadedMap().get(url);
+			if(integer!=null&&(integer==0||integer==1)){
+				integer=null;
+				System.out.println("相同图片");
+			}else{
+				integer=null;
+				ApplicationProperties.getDownloadedMap().put(url, 0);
+				ApplicationProperties.setFileNo(ApplicationProperties.getFileNo()+1);
+				fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+name;
+				File file=new File(fileUrl);
+				if(!file.exists())file.mkdirs();
+				fileUrl=fileUrl+File.separator+ApplicationProperties.getFileNo()+".jpeg";
+				
+				downloadFile(url,fileUrl,name);
+			}
+			
+		});
+		return elements==null?0:elements.size();
+	}
+
 }
