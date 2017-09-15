@@ -1,14 +1,11 @@
 package utils;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.commons.lang3.StringUtils;
 
 import entity.ApplicationProperties;
 import entity.QueryParams;
@@ -33,27 +30,30 @@ public class InitPropertiesUtils {
 		ApplicationProperties.setSex(properties.getProperty("sex").toString());
 		ApplicationProperties.setBaidu(properties.getProperty("baidu").toString());
 		ApplicationProperties.setBing(properties.getProperty("bing").toString());
-		String sexStr=StringUtils.isBlank(ApplicationProperties.getSex())?"全部":ApplicationProperties.getSex();
-		String areaStr=StringUtils.isBlank(ApplicationProperties.getArea())?"全部":ApplicationProperties.getArea();
-		ApplicationProperties.setDownloadFilePath(properties.getProperty("downloadFilePath").toString()+File.separator+sexStr+File.separator+areaStr);
+		ApplicationProperties.setDownloadFileParentPath(properties.getProperty("downloadFileParentPath").toString());
 		ApplicationProperties.setLogFileSavePath(properties.getProperty("logFileSavePath").toString());
+		ApplicationProperties.setBaiduReferer(properties.getProperty("baiduReferer"));
+		ApplicationProperties.setFinishedPersons(properties.getProperty("finishedPersons").toString());
+		ApplicationProperties.setThreadNums(Integer.valueOf(properties.getProperty("threadNum", "1")));
 	}
 	
 	/**
 	 * 从百度获取明星名单
+	 * @param area 
+	 * @param sex 
 	 */
-	public static void getStarsList(){
+	public static void getStarsList(String sex, String area){
 		List<String> starsList=new ArrayList<>();
 		List<String> subStarsList=new ArrayList<>();
 		QueryParams params=new QueryParams();
 		params.setType(1);
 		params.setPn(0);
 		params.setRn(100);
-		params.setSex(ApplicationProperties.getSex());
-		params.setArea(ApplicationProperties.getArea());
+		params.setSex(sex);
+		params.setArea(area);
 		do{
 			Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
-			String entityString=HttpUtils.sendGet(ApplicationProperties.getStarListUrl(), parameters);
+			String entityString=HttpUtils.sendGet(ApplicationProperties.getStarListUrl(), parameters,null,0);
 			subStarsList=CommonUtils.getStartListJson(entityString);
 			starsList.addAll(subStarsList);
 			params.setPn(params.getPn()+subStarsList.size());
@@ -69,9 +69,21 @@ public class InitPropertiesUtils {
 		params.setRn(30);
 		params.setName(name);
 		Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
-		String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters);
+		String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,name,0);
 		JSONObject entityJson=JSONObject.fromObject(entityString);
 		result=entityJson.getInt("displayNum");
 		return result;
 	}
+
+	public static List<String> getAreaList() {
+		List<String> areaList=new ArrayList<>();
+		areaList.add("内地");
+		areaList.add("香港");
+		areaList.add("台湾");
+		areaList.add("日本");
+		areaList.add("韩国");
+		areaList.add("欧美");
+		return areaList;
+	}
+
 }

@@ -3,6 +3,8 @@ package Threads;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang3.StringUtils;
+
 import entity.ApplicationProperties;
 import entity.QueryParams;
 import utils.CommonUtils;
@@ -32,12 +34,13 @@ public class ImageUrlThread implements Callable<Boolean> {
 		params.setType(2);
 		params.setPn(pn);
 		params.setName(name);
+		params.setRn(30);
 		do{
-			int rn =Math.min(36, end-params.getPn());
-			params.setRn(rn);
-			Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
-			String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters);
-			CommonUtils.parseBaiduImageUrl(entityString);
+			Map<String, String> parameters=QueryParamsUtils.getParamStr(params); //设置参数
+			String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,name,1);//发送请求
+			if(entityString!=null&&StringUtils.isNotBlank(entityString)){
+				CommonUtils.parseBaiduImageUrl(entityString);//解析结果
+			}
 			params.setPn(params.getPn()+params.getRn());
 		}while(params.getPn()<end);
 		return true;

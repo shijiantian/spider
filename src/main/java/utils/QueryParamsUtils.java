@@ -1,10 +1,7 @@
 package utils;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.mysql.fabric.xmlrpc.base.Data;
 
 import entity.QueryParams;
 
@@ -37,12 +34,11 @@ public class QueryParamsUtils {
 			params.put("fp","result");
 			params.put("queryWord","");
 			params.put("cl","2");//图片搜索
-//			params.put("lm","0");//时间限制
+			params.put("lm","-1");//时间限制
 			params.put("ie","utf-8");//查询关键词的编码
 			params.put("oe","utf-8");
 			params.put("adpicid","");
-//			params.put("st","");
-			params.put("gpc", "stf=1505232000,1505318398|stftype=2");
+			params.put("st","");
 			params.put("word",queryParams.getName());
 			params.put("z","");
 			params.put("ic","0");
