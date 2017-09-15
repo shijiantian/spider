@@ -1,5 +1,6 @@
 package entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -24,6 +25,9 @@ public class ApplicationProperties {
 	
 	private static ConcurrentMap<String, Integer> downloadedMap=new ConcurrentHashMap<>();  //一下载图片  1成功 0失败
 	private static ConcurrentMap<String, Integer> downloadedSites=new ConcurrentHashMap<>(); //某人已下载过的站 
+	
+	private static List<String> picSize=new ArrayList<>();
+	private static List<String> picColor=new ArrayList<>();
 			
 	public static String getStarListUrl() {
 		return starListUrl;
@@ -115,5 +119,17 @@ public class ApplicationProperties {
 	}
 	public static void setThreadNums(Integer threadNums) {
 		ApplicationProperties.threadNums = threadNums;
+	}
+	public static List<String> getPicSize() {
+		return picSize;
+	}
+	public static void setPicSize(List<String> picSize) {
+		ApplicationProperties.picSize = picSize;
+	}
+	public static List<String> getPicColor() {
+		return picColor;
+	}
+	public static void setPicColor(List<String> picColor) {
+		ApplicationProperties.picColor = picColor;
 	}
 }

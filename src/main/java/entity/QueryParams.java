@@ -7,7 +7,8 @@ public class QueryParams {
 	private String area;
 	private String sex;
 	private String name;//要检索的人员名字
-	
+	private String picSize;
+	private String picColor;
 	
 	public int getType() {
 		return type;
@@ -44,5 +45,17 @@ public class QueryParams {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getPicSize() {
+		return picSize;
+	}
+	public void setPicSize(String picSize) {
+		this.picSize = picSize;
+	}
+	public String getPicColor() {
+		return picColor;
+	}
+	public void setPicColor(String picColor) {
+		this.picColor = picColor;
 	}
 }

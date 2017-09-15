@@ -65,14 +65,16 @@ public class CommonUtils {
 	 * 从返回结果中解析图片路径
 	 * @param imageMap
 	 * @param entityString
+	 * @param picColor 
+	 * @param picSize 
+	 * @param queryExt 
 	 */
-	public static boolean parseBaiduImageUrl(String entityString) {
+	public static boolean parseBaiduImageUrl(String entityString, String picSize, String picColor, String queryExt) {
 		JSONObject entity=JSONObject.fromObject(entityString);
-		String queryExt=entity.getString("queryExt");
+		
 		if(StringUtils.isBlank(queryExt))
 			return false;
 		
-		queryExt=new String(queryExt.getBytes(Charset.forName("ISO-8859-1")));
 		if(queryExt.contains("site"))
 			queryExt=queryExt.substring(0, queryExt.indexOf(" "));
 		JSONArray data=entity.getJSONArray("data");
@@ -110,24 +112,26 @@ public class CommonUtils {
 			//website是否已访问
 			if(isSiteDownloaded==null||isSiteDownloaded!=1){
 				ApplicationProperties.getDownloadedSites().put(fromURLHost, 1);
-				downloadSite(fromURLHost,queryExt);
+				downloadSite(fromURLHost,queryExt,picSize,picColor);
 			}
 		}
 		
 		return true;
 	}
 
-	private static boolean downloadSite(String fromURLHost, String name) {
+	private static boolean downloadSite(String fromURLHost, String name, String picSize, String picColor) {
 		QueryParams params=new QueryParams();
 		params.setType(2);
 		params.setPn(0);
 		params.setName(name+" site:"+fromURLHost);
 		params.setRn(30);
+		params.setPicColor(picColor);
+		params.setPicSize(picSize);
 		do{
 			Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
 			String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,name,1);
 			if(entityString!=null&&StringUtils.isNotBlank(entityString)){
-				CommonUtils.parseBaiduImageUrl(entityString);
+				CommonUtils.parseBaiduImageUrl(entityString,picSize,picColor,name);
 			}
 			params.setPn(params.getPn()+params.getRn());
 		}while(params.getPn()<2000);

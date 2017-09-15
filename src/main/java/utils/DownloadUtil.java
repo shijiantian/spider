@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ForkJoinTask;
 
+import com.sun.jersey.core.impl.provider.entity.XMLJAXBElementProvider.App;
+
 import Threads.ImageUrlThread;
 import entity.ApplicationProperties;
 import entity.QueryParams;
@@ -40,17 +42,21 @@ public class DownloadUtil {
 //			int size=Runtime.getRuntime().availableProcessors()+3;//要开启的线程数量
 			int size=ApplicationProperties.getThreadNums();
 			final int picNum4Thread=picNums/size;  //每个线程要处理的数量
-			for (int i = 0; i < picNums; i += picNum4Thread) {
-	            // 当前任务起始位置（包含）
-	            final int pn = i;
-	            // 当前任务结束位置（不包含
-	            final int end = Math.min(i + picNum4Thread, picNums);
-	            // 提交任务，并将任务加入任务列表
-	            ImageUrlThread thread=new ImageUrlThread(name, pn, end);
-	            taskList.add(ApplicationProperties.pool.submit(thread));
-	        }
-			for(int i=0;i<taskList.size();i++){
-				taskList.get(i).join();
+			for(String picSize:ApplicationProperties.getPicSize()){
+				for(String picColor:ApplicationProperties.getPicColor()){
+					for (int i = 0; i < picNums; i += picNum4Thread) {
+			            // 当前任务起始位置（包含）
+			            final int pn = i;
+			            // 当前任务结束位置（不包含
+			            final int end = Math.min(i + picNum4Thread, picNums);
+			            // 提交任务，并将任务加入任务列表
+			            ImageUrlThread thread=new ImageUrlThread(name, pn, end,picSize,picColor);
+			            taskList.add(ApplicationProperties.pool.submit(thread));
+			        }
+					for(int i=0;i<taskList.size();i++){
+						taskList.get(i).join();
+					}
+				}
 			}
 			//下载结束清除
 			clear(taskList,name);
