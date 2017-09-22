@@ -1,11 +1,13 @@
 package utils;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.http.client.config.RequestConfig;
+import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -14,7 +16,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import entity.ApplicationProperties;
-import entity.RandomUserAgent;
 
 /**
  * 用于模拟HTTP请求中GET/POST方式 
@@ -68,7 +69,13 @@ public class HttpUtils {
 
             if(statusCode == 200) {
                 //获取返回实例entity
-                entityString =EntityUtils.toString(response.getEntity());
+            	BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),"utf-8"));
+            	StringBuffer sb=new StringBuffer();
+            	String newLine=null;
+            	while ((newLine =bufferedReader.readLine())!=null) {
+					sb.append(newLine);
+				}
+                entityString =sb.toString();
                 //输出
                 System.out.println("请求成功!"+uri.toString());
             }else {

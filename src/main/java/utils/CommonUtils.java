@@ -7,19 +7,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -31,7 +28,6 @@ import org.jsoup.nodes.Element;
 
 import entity.ApplicationProperties;
 import entity.QueryParams;
-import entity.RandomUserAgent;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -70,14 +66,28 @@ public class CommonUtils {
 	 * @param queryExt 
 	 */
 	public static boolean parseBaiduImageUrl(String entityString, String picSize, String picColor, String queryExt) {
-		JSONObject entity=JSONObject.fromObject(entityString);
-		
+		JSONObject entity=null;
+		try{
+			entity=JSONObject.fromObject(new String(entityString.getBytes(),"utf-8"));
+		}catch (Exception e) {
+			entity=null;
+			e.printStackTrace();
+		}
+		if(entity==null)
+			return false;
 		if(StringUtils.isBlank(queryExt))
 			return false;
-		
+		entityString=null;
 		if(queryExt.contains("site"))
 			queryExt=queryExt.substring(0, queryExt.indexOf(" "));
-		JSONArray data=entity.getJSONArray("data");
+		JSONArray data=null;
+		try {
+			data=entity.getJSONArray("data");
+		} catch (Exception e) {
+			data=null;
+			e.printStackTrace();
+		}
+		entity=null;
 		if(data==null||data.isEmpty())
 			return false;
 		@SuppressWarnings("unchecked")
@@ -90,28 +100,31 @@ public class CommonUtils {
 			if(StringUtils.isBlank(middleURL))
 				continue;
 			String fromURLHost=jsonObject.getString("fromURLHost");
-			Integer isSiteDownloaded=ApplicationProperties.getDownloadedSites().get(fromURLHost);
-			String fileUrl="";
-			//图片链接是否已下载
-			Integer integer=null;
+			data.remove(jsonObject);
+			jsonObject=null;
+			Integer isSiteDownloaded=null;
 			synchronized (CommonUtils.class) {
-				ConcurrentMap<String, Integer> map=ApplicationProperties.getDownloadedMap();
-				integer=map.get(middleURL);
-			}
-			if(integer==null||integer!=1){
-				fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+queryExt;
-				File file=new File(fileUrl);
-				if(!file.exists())file.mkdirs();
-				synchronized (CommonUtils.class) {
+				isSiteDownloaded=ApplicationProperties.getDownloadedSites().get("picSize"+picSize+"picColor"+picColor+fromURLHost);
+				String fileUrl="";
+				//图片链接是否已下载
+				Integer integer=null;
+				integer=ApplicationProperties.getDownloadedMap().get(middleURL);
+				if(integer==null||integer!=1){
+					fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+queryExt;
+					File file=new File(fileUrl);
+					if(!file.exists())file.mkdirs();
 					ApplicationProperties.getDownloadedMap().put(middleURL, 0);
 					ApplicationProperties.setFileNo(ApplicationProperties.getFileNo()+1);
 					fileUrl=fileUrl+File.separator+ApplicationProperties.getFileNo()+middleURL.substring(middleURL.lastIndexOf("."));
+					downloadFile(middleURL,fileUrl,queryExt);
 				}
-				downloadFile(middleURL,fileUrl,queryExt);
+				//website未访问
+				if(isSiteDownloaded==null||isSiteDownloaded!=1){
+					ApplicationProperties.getDownloadedSites().put("picSize"+picSize+"picColor"+picColor+fromURLHost, 1);
+				}
 			}
-			//website是否已访问
+			//website未访问
 			if(isSiteDownloaded==null||isSiteDownloaded!=1){
-				ApplicationProperties.getDownloadedSites().put(fromURLHost, 1);
 				downloadSite(fromURLHost,queryExt,picSize,picColor);
 			}
 		}

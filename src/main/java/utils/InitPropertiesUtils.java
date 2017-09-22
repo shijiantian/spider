@@ -35,11 +35,13 @@ public class InitPropertiesUtils {
 		ApplicationProperties.setBaiduReferer(properties.getProperty("baiduReferer"));
 		ApplicationProperties.setFinishedPersons(properties.getProperty("finishedPersons").toString());
 		ApplicationProperties.setThreadNums(Integer.valueOf(properties.getProperty("threadNum", "1")));
+		ApplicationProperties.getPicSize().add("");
 		ApplicationProperties.getPicSize().add("9");
 		ApplicationProperties.getPicSize().add("3");
 		ApplicationProperties.getPicSize().add("2");
 		ApplicationProperties.getPicSize().add("1");
 		ApplicationProperties.getPicSize().add("0");
+		ApplicationProperties.getPicColor().add("");
 		ApplicationProperties.getPicColor().add("1");
 		ApplicationProperties.getPicColor().add("256");
 		ApplicationProperties.getPicColor().add("2");
@@ -52,6 +54,7 @@ public class InitPropertiesUtils {
 		ApplicationProperties.getPicColor().add("1024");
 		ApplicationProperties.getPicColor().add("512");
 		ApplicationProperties.getPicColor().add("2048");
+		
 	}
 	
 	/**

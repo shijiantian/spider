@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ForkJoinTask;
 
-import com.sun.jersey.core.impl.provider.entity.XMLJAXBElementProvider.App;
-
 import Threads.ImageUrlThread;
 import entity.ApplicationProperties;
 import entity.QueryParams;
@@ -103,7 +101,7 @@ public class DownloadUtil {
 	private static boolean checkLogInfo(String name) {
 		boolean isfinished=false;
 		String fileName=ApplicationProperties.getFinishedPersons();
-		File file=new File(fileName);
+		File file=new File(ApplicationProperties.getLogFileSavePath()+File.separator+fileName);
 		if(!file.exists())
 			return false;
 		FileInputStream inputStream=null;
@@ -140,7 +138,7 @@ public class DownloadUtil {
 		File logPath=new File(ApplicationProperties.getLogFileSavePath());
 		if(!logPath.exists())
 			logPath.mkdirs();
-		String filePath=logPath+File.separator+"finishedPersons";
+		String filePath=logPath+File.separator+ApplicationProperties.getFinishedPersons();
 		//将名字写入文件
 		writeLine2File(filePath,name);
 		
