@@ -8,12 +8,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -69,8 +67,9 @@ public class CommonUtils {
 		JSONObject entity=null;
 		try{
 			entity=JSONObject.fromObject(new String(entityString.getBytes(),"utf-8"));
-		}catch (Exception e) {
+		}catch (Throwable e) {
 			entity=null;
+			System.out.println("解析返回json错误！"+entityString);
 			e.printStackTrace();
 		}
 		if(entity==null)
@@ -83,8 +82,9 @@ public class CommonUtils {
 		JSONArray data=null;
 		try {
 			data=entity.getJSONArray("data");
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			data=null;
+			System.out.println("解析data数组失败！"+entityString);
 			e.printStackTrace();
 		}
 		entity=null;
@@ -93,39 +93,44 @@ public class CommonUtils {
 		@SuppressWarnings("unchecked")
 		Iterator<JSONObject> iterator=data.iterator();
 		while(iterator.hasNext()){
-			JSONObject jsonObject=iterator.next();
-			if(jsonObject==null||jsonObject.isEmpty()||jsonObject.isNullObject())
-				continue;
-			String middleURL=jsonObject.getString("middleURL");
-			if(StringUtils.isBlank(middleURL))
-				continue;
-			String fromURLHost=jsonObject.getString("fromURLHost");
-			data.remove(jsonObject);
-			jsonObject=null;
-			Integer isSiteDownloaded=null;
-			synchronized (CommonUtils.class) {
-				isSiteDownloaded=ApplicationProperties.getDownloadedSites().get("picSize"+picSize+"picColor"+picColor+fromURLHost);
-				String fileUrl="";
-				//图片链接是否已下载
-				Integer integer=null;
-				integer=ApplicationProperties.getDownloadedMap().get(middleURL);
-				if(integer==null||integer!=1){
-					fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+queryExt;
-					File file=new File(fileUrl);
-					if(!file.exists())file.mkdirs();
-					ApplicationProperties.getDownloadedMap().put(middleURL, 0);
-					ApplicationProperties.setFileNo(ApplicationProperties.getFileNo()+1);
-					fileUrl=fileUrl+File.separator+ApplicationProperties.getFileNo()+middleURL.substring(middleURL.lastIndexOf("."));
-					downloadFile(middleURL,fileUrl,queryExt);
+			try {
+				JSONObject jsonObject=iterator.next();
+				if(jsonObject==null||jsonObject.isEmpty()||jsonObject.isNullObject())
+					continue;
+				String middleURL=jsonObject.getString("middleURL");
+				if(StringUtils.isBlank(middleURL))
+					continue;
+				String fromURLHost=jsonObject.getString("fromURLHost");
+				data.remove(jsonObject);
+				jsonObject=null;
+				Integer isSiteDownloaded=null;
+				synchronized (CommonUtils.class) {
+					isSiteDownloaded=ApplicationProperties.getDownloadedSites().get("picSize"+picSize+"picColor"+picColor+fromURLHost);
+					String fileUrl="";
+					//图片链接是否已下载
+					Integer integer=null;
+					integer=ApplicationProperties.getDownloadedMap().get(middleURL);
+					if(integer==null||integer!=1){
+						fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+queryExt;
+						File file=new File(fileUrl);
+						if(!file.exists())file.mkdirs();
+						ApplicationProperties.getDownloadedMap().put(middleURL, 0);
+						ApplicationProperties.setFileNo(ApplicationProperties.getFileNo()+1);
+						fileUrl=fileUrl+File.separator+ApplicationProperties.getFileNo()+middleURL.substring(middleURL.lastIndexOf("."));
+						downloadFile(middleURL,fileUrl,queryExt);
+					}
+					//website未访问
+					if(isSiteDownloaded==null||isSiteDownloaded!=1){
+						ApplicationProperties.getDownloadedSites().put("picSize"+picSize+"picColor"+picColor+fromURLHost, 1);
+					}
 				}
 				//website未访问
 				if(isSiteDownloaded==null||isSiteDownloaded!=1){
-					ApplicationProperties.getDownloadedSites().put("picSize"+picSize+"picColor"+picColor+fromURLHost, 1);
+					downloadSite(fromURLHost,queryExt,picSize,picColor);
 				}
-			}
-			//website未访问
-			if(isSiteDownloaded==null||isSiteDownloaded!=1){
-				downloadSite(fromURLHost,queryExt,picSize,picColor);
+			} catch (Throwable e) {
+				System.out.println("下载图片错误!");
+				e.printStackTrace();
 			}
 		}
 		

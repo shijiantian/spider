@@ -2,10 +2,14 @@ package utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.apache.commons.lang.StringUtils;
 
 import entity.ApplicationProperties;
 import entity.QueryParams;
@@ -20,20 +24,23 @@ public class InitPropertiesUtils {
 		Properties properties=new Properties();
 		try {
 			FileInputStream proInput=new FileInputStream("application.properties");
-			properties.load(proInput);
+//			properties.load(proInput);
+			properties.load(new InputStreamReader(proInput, "utf-8"));
 			proInput.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		ApplicationProperties.setStarListUrl(properties.getProperty("starListUrl").toString());
-		ApplicationProperties.setArea(properties.getProperty("area").toString());
-		ApplicationProperties.setSex(properties.getProperty("sex").toString());
-		ApplicationProperties.setBaidu(properties.getProperty("baidu").toString());
-		ApplicationProperties.setBing(properties.getProperty("bing").toString());
-		ApplicationProperties.setDownloadFileParentPath(properties.getProperty("downloadFileParentPath").toString());
-		ApplicationProperties.setLogFileSavePath(properties.getProperty("logFileSavePath").toString());
+		ApplicationProperties.setStarListUrl(properties.getProperty("starListUrl"));
+		if(StringUtils.isNotBlank(properties.getProperty("area")))
+			ApplicationProperties.setArea(properties.getProperty("area"));
+		if(StringUtils.isNotBlank(properties.getProperty("sex")))
+			ApplicationProperties.setSex(properties.getProperty("sex"));
+		ApplicationProperties.setBaidu(properties.getProperty("baidu"));
+		ApplicationProperties.setBing(properties.getProperty("bing"));
+		ApplicationProperties.setDownloadFileParentPath(properties.getProperty("downloadFileParentPath"));
+		ApplicationProperties.setLogFileSavePath(properties.getProperty("logFileSavePath"));
 		ApplicationProperties.setBaiduReferer(properties.getProperty("baiduReferer"));
-		ApplicationProperties.setFinishedPersons(properties.getProperty("finishedPersons").toString());
+		ApplicationProperties.setFinishedPersons(properties.getProperty("finishedPersons"));
 		ApplicationProperties.setThreadNums(Integer.valueOf(properties.getProperty("threadNum", "1")));
 		ApplicationProperties.getPicSize().add("");
 		ApplicationProperties.getPicSize().add("9");
@@ -54,7 +61,10 @@ public class InitPropertiesUtils {
 		ApplicationProperties.getPicColor().add("1024");
 		ApplicationProperties.getPicColor().add("512");
 		ApplicationProperties.getPicColor().add("2048");
-		
+		String specified=properties.getProperty("specified");
+		if(StringUtils.isNotBlank(specified)){
+			ApplicationProperties.setSpecified(specified.split(","));
+		}
 	}
 	
 	/**
@@ -63,22 +73,28 @@ public class InitPropertiesUtils {
 	 * @param sex 
 	 */
 	public static void getStarsList(String sex, String area){
-		List<String> starsList=new ArrayList<>();
-		List<String> subStarsList=new ArrayList<>();
-		QueryParams params=new QueryParams();
-		params.setType(1);
-		params.setPn(0);
-		params.setRn(100);
-		params.setSex(sex);
-		params.setArea(area);
-		do{
-			Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
-			String entityString=HttpUtils.sendGet(ApplicationProperties.getStarListUrl(), parameters,null,0);
-			subStarsList=CommonUtils.getStartListJson(entityString);
-			starsList.addAll(subStarsList);
-			params.setPn(params.getPn()+subStarsList.size());
-		}while(subStarsList.size()!=0);
-		ApplicationProperties.setStarsList(starsList);
+		String[] specified=ApplicationProperties.getSpecified();
+		if(specified!=null&&specified.length>0){
+			List<String> specifiedList=Arrays.asList(specified);
+			ApplicationProperties.setStarsList(specifiedList);
+		}else{
+			List<String> starsList=new ArrayList<>();
+			List<String> subStarsList=new ArrayList<>();
+			QueryParams params=new QueryParams();
+			params.setType(1);
+			params.setPn(0);
+			params.setRn(100);
+			params.setSex(sex);
+			params.setArea(area);
+			do{
+				Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
+				String entityString=HttpUtils.sendGet(ApplicationProperties.getStarListUrl(), parameters,null,0);
+				subStarsList=CommonUtils.getStartListJson(entityString);
+				starsList.addAll(subStarsList);
+				params.setPn(params.getPn()+subStarsList.size());
+			}while(subStarsList.size()!=0);
+			ApplicationProperties.setStarsList(starsList);
+		}
 	}
 	
 	public static int getPicNums4Everyone(String name) {

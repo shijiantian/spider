@@ -30,6 +30,7 @@ public class DownloadUtil {
 		List<ForkJoinTask<Boolean>> taskList=new ArrayList<>();
 		//获取每个人的图片路径 
 		for(String name:persons){
+			System.out.println(name+":图片下载开始!");
 			//检查下载日志，载入已下载图片信息
 			if(checkLogInfo(name))
 				continue;
@@ -58,7 +59,7 @@ public class DownloadUtil {
 			}
 			//下载结束清除
 			clear(taskList,name);
-			
+			System.out.println(name+":图片下载结束！");
 		}	
 	}
 

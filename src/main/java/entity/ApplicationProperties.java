@@ -22,6 +22,7 @@ public class ApplicationProperties {
 	private static String baiduReferer;
 	private static String finishedPersons;
 	private static Integer threadNums;
+	private static String[] specified;
 	
 	private static ConcurrentMap<String, Integer> downloadedMap=new ConcurrentHashMap<>();  //一下载图片  1成功 0失败
 	private static ConcurrentMap<String, Integer> downloadedSites=new ConcurrentHashMap<>(); //某人已下载过的站 
@@ -131,5 +132,11 @@ public class ApplicationProperties {
 	}
 	public static void setPicColor(List<String> picColor) {
 		ApplicationProperties.picColor = picColor;
+	}
+	public static String[] getSpecified() {
+		return specified;
+	}
+	public static void setSpecified(String[] specified) {
+		ApplicationProperties.specified = specified;
 	}
 }
