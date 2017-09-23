@@ -34,7 +34,7 @@ public class Entrance {
 		if(sexlist!=null&&arealist!=null){
 			for(String sex:sexlist){
 				for(String area:arealist){
-					ApplicationProperties.setDownloadFilePath(ApplicationProperties.getDownloadFileParentPath()+File.separator+sex+File.separator+area);
+					setDownloadFilePath(sex,area);
 					//从百度获取名单
 					InitPropertiesUtils.getStarsList(sex,area);
 					//为每个人创建百度下载任务
@@ -44,8 +44,7 @@ public class Entrance {
 		}else if(sexlist!=null&&arealist==null){
 		//设置了地区则下载该地区所有性别的明星
 			for(String sex:sexlist){
-				ApplicationProperties.setDownloadFilePath(ApplicationProperties.getDownloadFileParentPath()+File.separator+sex+File.separator+ApplicationProperties.getArea());
-
+				setDownloadFilePath(sex,ApplicationProperties.getArea());
 				//从百度获取名单
 				InitPropertiesUtils.getStarsList(sex,ApplicationProperties.getArea());
 				//为每个人创建百度下载任务
@@ -54,7 +53,7 @@ public class Entrance {
 		}else if(sexlist==null&&arealist!=null){
 		//设置了性别则下载该性别下所有地区的明星
 			for(String area:arealist){
-				ApplicationProperties.setDownloadFilePath(ApplicationProperties.getDownloadFileParentPath()+File.separator+ApplicationProperties.getSex()+File.separator+area);
+				setDownloadFilePath(ApplicationProperties.getSex(),area);
 				//从百度获取名单
 				InitPropertiesUtils.getStarsList(ApplicationProperties.getSex(),area);
 				//为每个人创建百度下载任务
@@ -62,8 +61,7 @@ public class Entrance {
 			}
 		}else if(sexlist==null&&arealist==null){
 		//设置了性别和地区则下载该性别和地区下的明星
-			ApplicationProperties.setDownloadFilePath(ApplicationProperties.getDownloadFileParentPath()+File.separator+ApplicationProperties.getSex()+File.separator+ApplicationProperties.getArea());
-
+			setDownloadFilePath(ApplicationProperties.getSex(),ApplicationProperties.getArea());
 			//从百度获取名单
 			InitPropertiesUtils.getStarsList(ApplicationProperties.getSex(),ApplicationProperties.getArea());
 			//为每个人创建百度下载任务
@@ -73,5 +71,13 @@ public class Entrance {
 		
 		//为每个人创建必应下载任务
 //		DownloadUtil.createBingDownloadTask();
+	}
+
+	private static void setDownloadFilePath(String sex, String area) {
+		if(ApplicationProperties.getSpecified()!=null&&ApplicationProperties.getSpecified().length>0){
+			ApplicationProperties.setDownloadFilePath(ApplicationProperties.getDownloadFileParentPath());
+		}else{
+			ApplicationProperties.setDownloadFilePath(ApplicationProperties.getDownloadFileParentPath()+File.separator+sex+File.separator+area);
+		}
 	}
 }
