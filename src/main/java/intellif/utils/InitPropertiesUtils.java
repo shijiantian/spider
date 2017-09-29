@@ -1,4 +1,4 @@
-package utils;
+package intellif.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,8 +11,8 @@ import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 
-import entity.ApplicationProperties;
-import entity.QueryParams;
+import intellif.entity.ApplicationProperties;
+import intellif.entity.QueryParams;
 import net.sf.json.JSONObject;
 
 public class InitPropertiesUtils {
@@ -65,6 +65,12 @@ public class InitPropertiesUtils {
 		if(StringUtils.isNotBlank(specified)){
 			ApplicationProperties.setSpecified(specified.split(","));
 		}
+		String secondWords=properties.getProperty("secondWords");
+		if(StringUtils.isNotBlank(secondWords)){
+			List<String> secondWordsList=Arrays.asList(secondWords.split(","));
+			ApplicationProperties.getSecondWords().add("empty");
+			ApplicationProperties.getSecondWords().addAll(secondWordsList);
+		}
 	}
 	
 	/**
@@ -103,7 +109,7 @@ public class InitPropertiesUtils {
 		params.setType(2);
 		params.setPn(0);
 		params.setRn(30);
-		params.setName(name);
+		params.setKeyWord(name);
 		Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
 		String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,name,0);
 		JSONObject entityJson=JSONObject.fromObject(entityString);

@@ -1,4 +1,4 @@
-package entity;
+package intellif.entity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,8 @@ public class ApplicationProperties {
 	
 	private static List<String> picSize=new ArrayList<>();
 	private static List<String> picColor=new ArrayList<>();
+	
+	private static List<String> secondWords=new ArrayList<>();
 			
 	public static String getStarListUrl() {
 		return starListUrl;
@@ -139,4 +141,11 @@ public class ApplicationProperties {
 	public static void setSpecified(String[] specified) {
 		ApplicationProperties.specified = specified;
 	}
+	public static List<String> getSecondWords() {
+		return secondWords;
+	}
+	public static void setSecondWords(List<String> secondWords) {
+		ApplicationProperties.secondWords = secondWords;
+	}
+	
 }

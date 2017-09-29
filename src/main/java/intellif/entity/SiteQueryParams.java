@@ -1,4 +1,4 @@
-package entity;
+package intellif.entity;
 
 public class SiteQueryParams {
 	private String fromURLHost;

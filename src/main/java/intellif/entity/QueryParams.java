@@ -1,4 +1,4 @@
-package entity;
+package intellif.entity;
 
 public class QueryParams {
 	private int type;//1获取名单  2获取图片路径与数量等信息 3 必应参数
@@ -6,7 +6,7 @@ public class QueryParams {
 	private int rn;
 	private String area;
 	private String sex;
-	private String name;//要检索的人员名字
+	private String keyWord;//要检索的人员名字
 	private String picSize;
 	private String picColor;
 	
@@ -40,12 +40,6 @@ public class QueryParams {
 	public void setRn(int rn) {
 		this.rn = rn;
 	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
 	public String getPicSize() {
 		return picSize;
 	}
@@ -57,5 +51,11 @@ public class QueryParams {
 	}
 	public void setPicColor(String picColor) {
 		this.picColor = picColor;
+	}
+	public String getKeyWord() {
+		return keyWord;
+	}
+	public void setKeyWord(String keyWord) {
+		this.keyWord = keyWord;
 	}
 }

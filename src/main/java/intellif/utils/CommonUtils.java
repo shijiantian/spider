@@ -1,4 +1,4 @@
-package utils;
+package intellif.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -20,16 +21,20 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import entity.ApplicationProperties;
-import entity.QueryParams;
+import intellif.entity.ApplicationProperties;
+import intellif.entity.QueryParams;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class CommonUtils {
+	
+	private static Logger LOG = LogManager.getLogger(CommonUtils.class);
 	
 	public static List<String> getStartListJson(String entityString){
 		List<String> result=new ArrayList<>();
@@ -62,15 +67,15 @@ public class CommonUtils {
 	 * @param picColor 
 	 * @param picSize 
 	 * @param queryExt 
+	 * @param queue 
 	 */
-	public static boolean parseBaiduImageUrl(String entityString, String picSize, String picColor, String queryExt) {
+	public static boolean parseBaiduImageUrl(String entityString, String picSize, String picColor, String queryExt, BlockingQueue<String> queue,String name) {
 		JSONObject entity=null;
 		try{
 			entity=JSONObject.fromObject(new String(entityString.getBytes(),"utf-8"));
 		}catch (Throwable e) {
 			entity=null;
-			System.out.println("解析返回json错误！"+entityString);
-			e.printStackTrace();
+			LOG.error("解析返回json错误！"+entityString,e);
 		}
 		if(entity==null)
 			return false;
@@ -84,8 +89,7 @@ public class CommonUtils {
 			data=entity.getJSONArray("data");
 		} catch (Throwable e) {
 			data=null;
-			System.out.println("解析data数组失败！"+entityString);
-			e.printStackTrace();
+			LOG.error("解析data数组失败！"+entityString,e);
 		}
 		entity=null;
 		if(data==null||data.isEmpty())
@@ -104,59 +108,63 @@ public class CommonUtils {
 				data.remove(jsonObject);
 				jsonObject=null;
 				Integer isSiteDownloaded=null;
+				boolean isDownload=false;
+				String fileUrl="";
 				synchronized (CommonUtils.class) {
 					isSiteDownloaded=ApplicationProperties.getDownloadedSites().get("picSize"+picSize+"picColor"+picColor+fromURLHost);
-					String fileUrl="";
 					//图片链接是否已下载
 					Integer integer=null;
 					integer=ApplicationProperties.getDownloadedMap().get(middleURL);
 					if(integer==null||integer!=1){
-						fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+queryExt;
+						fileUrl=ApplicationProperties.getDownloadFilePath()+File.separator+name;
 						File file=new File(fileUrl);
 						if(!file.exists())file.mkdirs();
-						ApplicationProperties.getDownloadedMap().put(middleURL, 0);
+						ApplicationProperties.getDownloadedMap().put(middleURL, 1);
 						ApplicationProperties.setFileNo(ApplicationProperties.getFileNo()+1);
 						fileUrl=fileUrl+File.separator+ApplicationProperties.getFileNo()+middleURL.substring(middleURL.lastIndexOf("."));
-						downloadFile(middleURL,fileUrl,queryExt);
+						isDownload=true;
 					}
 					//website未访问
 					if(isSiteDownloaded==null||isSiteDownloaded!=1){
 						ApplicationProperties.getDownloadedSites().put("picSize"+picSize+"picColor"+picColor+fromURLHost, 1);
 					}
 				}
+				if(isDownload){
+					downloadFile(middleURL,fileUrl,queryExt,name);
+				}
 				//website未访问
 				if(isSiteDownloaded==null||isSiteDownloaded!=1){
-					downloadSite(fromURLHost,queryExt,picSize,picColor);
+					queue.put(fromURLHost);
+//					downloadSite(fromURLHost,queryExt,picSize,picColor);
 				}
 			} catch (Throwable e) {
-				System.out.println("下载图片错误!");
-				e.printStackTrace();
+				LOG.error("下载图片错误!",e);
 			}
 		}
 		
 		return true;
 	}
 
-	private static boolean downloadSite(String fromURLHost, String name, String picSize, String picColor) {
+	public static boolean downloadSite(String fromURLHost, String keyword, String picSize, String picColor, BlockingQueue<String> queue,String name) {
 		QueryParams params=new QueryParams();
 		params.setType(2);
 		params.setPn(0);
-		params.setName(name+" site:"+fromURLHost);
+		params.setKeyWord(keyword+" site:"+fromURLHost);
 		params.setRn(30);
 		params.setPicColor(picColor);
 		params.setPicSize(picSize);
 		do{
 			Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
-			String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,name,1);
+			String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,keyword,1);
 			if(entityString!=null&&StringUtils.isNotBlank(entityString)){
-				CommonUtils.parseBaiduImageUrl(entityString,picSize,picColor,name);
+				CommonUtils.parseBaiduImageUrl(entityString,picSize,picColor,keyword,queue,name);
 			}
 			params.setPn(params.getPn()+params.getRn());
 		}while(params.getPn()<2000);
 		return true;
 	}
 
-	private static void downloadFile(String urlStr,String fileName,String queryExt){
+	private static void downloadFile(String urlStr,String fileName,String queryExt,String name){
 		CloseableHttpClient httpClient=null;
 		OutputStream outstream=null;
 		CloseableHttpResponse response=null;
@@ -185,7 +193,7 @@ public class CommonUtils {
 
                 if(statusCode == 200) {
                 	ApplicationProperties.getDownloadedMap().put(urlStr, 1);
-                	write2File(queryExt,urlStr,1);
+                	write2File(name,urlStr,1);
                     //获取返回实例entity
                     HttpEntity entity=response.getEntity();
                     //输出
@@ -215,11 +223,11 @@ public class CommonUtils {
 		
 	}
 
-	private synchronized static void write2File(String queryExt, String urlStr, int value) {
+	private synchronized static void write2File(String name, String urlStr, int value) {
 		File logParentPath=new File(ApplicationProperties.getLogFileSavePath());
 		if(!logParentPath.exists())
 			logParentPath.mkdirs();
-		String logPath=ApplicationProperties.getLogFileSavePath()+File.separator+queryExt;
+		String logPath=ApplicationProperties.getLogFileSavePath()+File.separator+name;
 		File logFile=new File(logPath);
 		FileOutputStream outputStream=null;
 		BufferedWriter bufferedWriter=null;
@@ -269,7 +277,7 @@ public class CommonUtils {
 				if(!file.exists())file.mkdirs();
 				fileUrl=fileUrl+File.separator+ApplicationProperties.getFileNo()+".jpeg";
 				
-				downloadFile(url,fileUrl,name);
+//				downloadFile(url,fileUrl,name);
 			}
 			
 		});

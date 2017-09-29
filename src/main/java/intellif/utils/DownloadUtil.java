@@ -1,4 +1,4 @@
-package utils;
+package intellif.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,13 +14,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ForkJoinTask;
 
-import Threads.ImageUrlThread;
-import entity.ApplicationProperties;
-import entity.QueryParams;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.bytedeco.javacpp.freenect;
+
+import intellif.Threads.ImageUrlThread;
+import intellif.entity.ApplicationProperties;
+import intellif.entity.QueryParams;
 
 public class DownloadUtil {
 	
-	
+	private static Logger LOG = LogManager.getLogger(DownloadUtil.class);
 	
 	/**
 	 * 为每个人创建百度下载任务
@@ -30,7 +35,7 @@ public class DownloadUtil {
 		List<ForkJoinTask<Boolean>> taskList=new ArrayList<>();
 		//获取每个人的图片路径 
 		for(String name:persons){
-			System.out.println(name+":图片下载开始!");
+			LOG.error(name+":图片下载开始!");
 			//检查下载日志，载入已下载图片信息
 			if(checkLogInfo(name))
 				continue;
@@ -41,25 +46,32 @@ public class DownloadUtil {
 //			int size=Runtime.getRuntime().availableProcessors()+3;//要开启的线程数量
 			int size=ApplicationProperties.getThreadNums();
 			final int picNum4Thread=picNums/size;  //每个线程要处理的数量
-			for(String picSize:ApplicationProperties.getPicSize()){
-				for(String picColor:ApplicationProperties.getPicColor()){
-					for (int i = 0; i < picNums; i += picNum4Thread) {
-			            // 当前任务起始位置（包含）
-			            final int pn = i;
-			            // 当前任务结束位置（不包含
-			            final int end = Math.min(i + picNum4Thread, picNums);
-			            // 提交任务，并将任务加入任务列表
-			            ImageUrlThread thread=new ImageUrlThread(name, pn, end,picSize,picColor);
-			            taskList.add(ApplicationProperties.pool.submit(thread));
-			        }
-					for(int i=0;i<taskList.size();i++){
-						taskList.get(i).join();
+			for(String secondWord:ApplicationProperties.getSecondWords()){
+				String keyWord=name;
+				if(!"empty".equals(secondWord)){
+					keyWord=name+" "+secondWord;
+				}
+				for(String picSize:ApplicationProperties.getPicSize()){
+					for(String picColor:ApplicationProperties.getPicColor()){
+						for (int i = 0; i < picNums; i += picNum4Thread) {
+				            // 当前任务起始位置（包含）
+				            final int pn = i;
+				            // 当前任务结束位置（不包含
+				            final int end = Math.min(i + picNum4Thread, picNums);
+				            // 提交任务，并将任务加入任务列表
+				            ImageUrlThread thread=new ImageUrlThread(keyWord, pn, end,picSize,picColor,name);
+				            taskList.add(ApplicationProperties.pool.submit(thread));
+				        }
+						for(int i=0;i<taskList.size();i++){
+							taskList.get(i).join();
+						}
 					}
 				}
 			}
+			
 			//下载结束清除
 			clear(taskList,name);
-			System.out.println(name+":图片下载结束！");
+			LOG.error(name+":图片下载结束！");
 		}	
 	}
 
@@ -187,7 +199,7 @@ public class DownloadUtil {
 			QueryParams params=new QueryParams();
 			params.setType(3);
 			params.setPn(0);
-			params.setName(name);
+			params.setKeyWord(name);
 			int resultNum=0;
 			do{
 				params.setRn(30);

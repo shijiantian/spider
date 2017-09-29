@@ -1,4 +1,4 @@
-package utils;
+package intellif.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,15 +7,13 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
-import entity.ApplicationProperties;
+import intellif.entity.ApplicationProperties;
 
 /**
  * 用于模拟HTTP请求中GET/POST方式 

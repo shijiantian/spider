@@ -1,9 +1,9 @@
-package utils;
+package intellif.utils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import entity.QueryParams;
+import intellif.entity.QueryParams;
 
 public class QueryParamsUtils {
 	
@@ -40,8 +40,8 @@ public class QueryParamsUtils {
 			params.put("adpicid","");
 			params.put("st","-1");
 			try {
-				params.put("word",queryParams.getName());
-				params.put("step_word",queryParams.getName());
+				params.put("word",queryParams.getKeyWord());
+				params.put("step_word",queryParams.getKeyWord());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -62,7 +62,7 @@ public class QueryParamsUtils {
 			params.put("gsm","1e");
 			break;
 		case 3:
-			params.put("q",queryParams.getName());
+			params.put("q",queryParams.getKeyWord());
 			params.put("first",""+queryParams.getPn());
 			params.put("count",""+queryParams.getRn());
 			params.put("relo","2");

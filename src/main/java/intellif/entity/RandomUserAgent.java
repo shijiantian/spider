@@ -1,4 +1,4 @@
-package entity;
+package intellif.entity;
 
 import java.util.Random;
 

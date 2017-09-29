@@ -1,13 +1,11 @@
-package Threads;
+package intellif.Threads;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import entity.ApplicationProperties;
-import entity.QueryParams;
-import utils.HttpUtils;
-import utils.QueryParamsUtils;
+import intellif.entity.QueryParams;
+import intellif.utils.QueryParamsUtils;
 
 public class BingDownloadThread implements Callable<Boolean> {
 	private List<String> persons;
@@ -23,7 +21,7 @@ public class BingDownloadThread implements Callable<Boolean> {
 			QueryParams params=new QueryParams();
 			params.setType(3);
 			params.setPn(0);
-			params.setName(name);
+			params.setKeyWord(name);
 			int resultNum=0;
 			do{
 				params.setRn(100);
