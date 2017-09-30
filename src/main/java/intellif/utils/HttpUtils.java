@@ -12,6 +12,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import intellif.entity.ApplicationProperties;
 
@@ -20,7 +22,9 @@ import intellif.entity.ApplicationProperties;
  * @author shijt
  *
  */
-public class HttpUtils {  
+public class HttpUtils { 
+	
+	private static Logger LOG = LogManager.getLogger(HttpUtils.class);
 	
 	/** 
      * 发get请求 
@@ -39,6 +43,8 @@ public class HttpUtils {
     	String entityString= null;
     	CloseableHttpClient httpClient=null;
     	CloseableHttpResponse response=null;
+    	InputStreamReader inputStreamReader=null;
+    	BufferedReader bufferedReader=null;
     	try {
             httpClient=HttpClients.createDefault();
             URIBuilder uri=new URIBuilder(url);
@@ -49,12 +55,6 @@ public class HttpUtils {
             });
             //创建httpGet对象
             HttpGet hg = new HttpGet(uri.build());
-//            RequestConfig config=RequestConfig.custom()
-//                    .setConnectTimeout(50000)
-//                    .setSocketTimeout(50000)
-//                    .setConnectionRequestTimeout(50000)
-//                    .build();
-//            hg.setConfig(config);
             hg.setHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36");
             if(needReferer==1)
             	hg.setHeader("Referer", ApplicationProperties.getBaiduReferer()+URLEncoder.encode(queryWord, "utf-8"));
@@ -67,7 +67,8 @@ public class HttpUtils {
 
             if(statusCode == 200) {
                 //获取返回实例entity
-            	BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),"utf-8"));
+            	inputStreamReader=new InputStreamReader(response.getEntity().getContent(),"utf-8");
+            	bufferedReader= new BufferedReader(inputStreamReader);
             	StringBuffer sb=new StringBuffer();
             	String newLine=null;
             	while ((newLine =bufferedReader.readLine())!=null) {
@@ -77,18 +78,19 @@ public class HttpUtils {
                 //输出
                 System.out.println("请求成功!"+uri.toString());
             }else {
-                //输出
-                System.out.println("请求失败!");
+                LOG.error("请求失败！"+uri.toString());
             }
-            response.close();
 		} catch (Exception e) {
 			entityString=null;
-			e.printStackTrace();
+			LOG.error("发送http请求失败",e);
 		}finally {
             try {
+            	bufferedReader.close();
+            	inputStreamReader.close();
+            	response.close();
 				httpClient.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOG.error("关闭失败",e);
 			}
 		}
         return entityString;

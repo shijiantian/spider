@@ -54,7 +54,7 @@ public class CommonUtils {
 				result.add(object.getString("ename"));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("获取明星名单失败",e);
 		}
 		return result;
 		
@@ -174,12 +174,6 @@ public class CommonUtils {
             
             //创建httpGet对象
             HttpGet hg = new HttpGet(uri.build());
-//            RequestConfig config=RequestConfig.custom()
-//                    .setConnectTimeout(50000)
-//                    .setSocketTimeout(50000)
-//                    .setConnectionRequestTimeout(50000)
-//                    .build();
-//            hg.setConfig(config);
             hg.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
             hg.setHeader("Accept-Encoding","gzip, deflate, br");
             hg.setHeader("Accept-Language","zh-CN,zh;q=0.8,en;q=0.6");
@@ -202,22 +196,21 @@ public class CommonUtils {
                 }else {
                     //输出
                 	ApplicationProperties.getDownloadedMap().put(urlStr, 0);
-                    System.out.println("请求失败!");
-                }
-
-              //关闭response
-               response.close();
+                    LOG.error("请求失败！"+uri.toString());
+                } 
             }
             
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("下载失败",e);
 		}finally {
 			try {
+				//关闭response
+				response.close();
 				if(outstream!=null)
 					outstream.close();
 				httpClient.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOG.error("关闭下载失败",e);
 			}
 		}
 		
@@ -230,6 +223,7 @@ public class CommonUtils {
 		String logPath=ApplicationProperties.getLogFileSavePath()+File.separator+name;
 		File logFile=new File(logPath);
 		FileOutputStream outputStream=null;
+		OutputStreamWriter outputStreamWriter=null;
 		BufferedWriter bufferedWriter=null;
 		try {
             String logContent=urlStr+","+value;
@@ -238,21 +232,23 @@ public class CommonUtils {
 			}else{
 				outputStream=new FileOutputStream(logFile);
 			}
-			bufferedWriter=new BufferedWriter(new OutputStreamWriter(outputStream));
+			outputStreamWriter=new OutputStreamWriter(outputStream);
+			bufferedWriter=new BufferedWriter(outputStreamWriter);
 			try {
 				bufferedWriter.write(logContent);
 				bufferedWriter.newLine();
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOG.error("写入"+name+"文件错误1:",e);
 			}
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			LOG.error("写入"+name+"文件错误2:",e);
 		}finally {
 			try {
 				bufferedWriter.close();
+				outputStreamWriter.close();
 				outputStream.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOG.error("关闭写入"+name+"文件错误",e);
 			}
 		}
 		
