@@ -2,9 +2,11 @@ package intellif.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ApplicationProperties {
 	public static final ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() + 4);
@@ -26,6 +28,8 @@ public class ApplicationProperties {
 	
 	private static ConcurrentMap<String, Integer> downloadedMap=new ConcurrentHashMap<>();  //一下载图片  1成功 0失败
 	private static ConcurrentMap<String, Integer> downloadedSites=new ConcurrentHashMap<>(); //某人已下载过的站 
+	private static BlockingQueue<String> wait2downloadqueue=new LinkedBlockingQueue<>();
+	private static List<String> wait2write=new ArrayList<>();
 	
 	private static List<String> picSize=new ArrayList<>();
 	private static List<String> picColor=new ArrayList<>();
@@ -147,5 +151,18 @@ public class ApplicationProperties {
 	public static void setSecondWords(List<String> secondWords) {
 		ApplicationProperties.secondWords = secondWords;
 	}
+	public static List<String> getWait2write() {
+		return wait2write;
+	}
+	public static void setWait2write(List<String> wait2write) {
+		ApplicationProperties.wait2write = wait2write;
+	}
+	public static BlockingQueue<String> getWait2downloadqueue() {
+		return wait2downloadqueue;
+	}
+	public static void setWait2downloadqueue(BlockingQueue<String> wait2downloadqueue) {
+		ApplicationProperties.wait2downloadqueue = wait2downloadqueue;
+	}
+	
 	
 }

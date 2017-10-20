@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,9 +14,7 @@ import intellif.utils.InitPropertiesUtils;
 
 @Component
 public class DowloadJobs {
-	
-	private static Logger LOG = LogManager.getLogger(DowloadJobs.class);
-	
+		
 	@Scheduled(fixedDelay=1 * 1000)
 	public void downloadJob(){
 		//读取配置文件
@@ -33,7 +29,7 @@ public class DowloadJobs {
 		if(StringUtils.isBlank(ApplicationProperties.getArea())){
 			arealist=InitPropertiesUtils.getAreaList();
 		}
-		LOG.error("下载开始..........");
+		System.out.println("下载开始..........");
 		//未设置性别和地区 则全部下载
 		if(sexlist!=null&&arealist!=null){
 			for(String sex:sexlist){
@@ -71,7 +67,7 @@ public class DowloadJobs {
 			//为每个人创建百度下载任务
 			DownloadUtil.createBaiduDownloadTask();
 		}
-		LOG.error("全部下载完成..........");
+		System.out.println("全部下载完成..........");
 	}
 	
 	private static void setDownloadFilePath(String sex, String area) {

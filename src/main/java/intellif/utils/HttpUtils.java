@@ -1,19 +1,20 @@
 package intellif.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.http.util.EntityUtils;
 
 import intellif.entity.ApplicationProperties;
 
@@ -23,9 +24,7 @@ import intellif.entity.ApplicationProperties;
  *
  */
 public class HttpUtils { 
-	
-	private static Logger LOG = LogManager.getLogger(HttpUtils.class);
-	
+		
 	/** 
      * 发get请求 
      *  
@@ -43,6 +42,7 @@ public class HttpUtils {
     	String entityString= null;
     	CloseableHttpClient httpClient=null;
     	CloseableHttpResponse response=null;
+    	InputStream inputStream=null;
     	InputStreamReader inputStreamReader=null;
     	BufferedReader bufferedReader=null;
     	try {
@@ -67,7 +67,9 @@ public class HttpUtils {
 
             if(statusCode == 200) {
                 //获取返回实例entity
-            	inputStreamReader=new InputStreamReader(response.getEntity().getContent(),"utf-8");
+            	HttpEntity entity=response.getEntity();
+            	inputStream=entity.getContent();
+            	inputStreamReader=new InputStreamReader(inputStream,"utf-8");
             	bufferedReader= new BufferedReader(inputStreamReader);
             	StringBuffer sb=new StringBuffer();
             	String newLine=null;
@@ -76,21 +78,25 @@ public class HttpUtils {
 				}
                 entityString =sb.toString();
                 //输出
-                System.out.println("请求成功!"+uri.toString());
+                System.out.println("请求成功!");
+                EntityUtils.consume(entity);
             }else {
-                LOG.error("请求失败！"+uri.toString());
+            	System.out.println("请求失败！"+uri.toString());
             }
 		} catch (Exception e) {
 			entityString=null;
-			LOG.error("发送http请求失败",e);
+			System.out.println("发送http请求失败");
+			e.printStackTrace();
 		}finally {
             try {
             	bufferedReader.close();
             	inputStreamReader.close();
+            	inputStream.close();
             	response.close();
 				httpClient.close();
 			} catch (IOException e) {
-				LOG.error("关闭失败",e);
+				System.out.println("关闭失败");
+				e.printStackTrace();
 			}
 		}
         return entityString;

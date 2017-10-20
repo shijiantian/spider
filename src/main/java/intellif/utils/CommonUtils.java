@@ -21,8 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -33,9 +32,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class CommonUtils {
-	
-	private static Logger LOG = LogManager.getLogger(CommonUtils.class);
-	
+		
 	public static List<String> getStartListJson(String entityString){
 		List<String> result=new ArrayList<>();
 		try {
@@ -54,7 +51,8 @@ public class CommonUtils {
 				result.add(object.getString("ename"));
 			}
 		} catch (Exception e) {
-			LOG.error("获取明星名单失败",e);
+			System.out.println("获取明星名单失败");
+			e.printStackTrace();
 		}
 		return result;
 		
@@ -75,7 +73,8 @@ public class CommonUtils {
 			entity=JSONObject.fromObject(new String(entityString.getBytes(),"utf-8"));
 		}catch (Throwable e) {
 			entity=null;
-			LOG.error("解析返回json错误！"+entityString,e);
+			System.out.println("解析返回json错误！"+entityString);
+			e.printStackTrace();
 		}
 		if(entity==null)
 			return false;
@@ -89,7 +88,8 @@ public class CommonUtils {
 			data=entity.getJSONArray("data");
 		} catch (Throwable e) {
 			data=null;
-			LOG.error("解析data数组失败！"+entityString,e);
+			System.out.println("解析data数组失败！"+entityString);
+			e.printStackTrace();
 		}
 		entity=null;
 		if(data==null||data.isEmpty())
@@ -138,7 +138,8 @@ public class CommonUtils {
 //					downloadSite(fromURLHost,queryExt,picSize,picColor);
 				}
 			} catch (Throwable e) {
-				LOG.error("下载图片错误!",e);
+				System.out.println("下载图片错误!");
+				e.printStackTrace();
 			}
 		}
 		
@@ -193,15 +194,18 @@ public class CommonUtils {
                     //输出
                     outstream=new FileOutputStream(fileName);
                     entity.writeTo(outstream);
+                    EntityUtils.consume(entity);
+                    System.out.println("下载成功！");
                 }else {
                     //输出
                 	ApplicationProperties.getDownloadedMap().put(urlStr, 0);
-                    LOG.error("请求失败！"+uri.toString());
+                	System.out.println("下载失败！"+uri.toString());
                 } 
             }
             
 		} catch (Exception e) {
-			LOG.error("下载失败",e);
+			System.out.println("下载失败");
+			e.printStackTrace();
 		}finally {
 			try {
 				//关闭response
@@ -210,7 +214,8 @@ public class CommonUtils {
 					outstream.close();
 				httpClient.close();
 			} catch (IOException e) {
-				LOG.error("关闭下载失败",e);
+				System.out.println("关闭下载失败");
+				e.printStackTrace();
 			}
 		}
 		
@@ -225,33 +230,38 @@ public class CommonUtils {
 		FileOutputStream outputStream=null;
 		OutputStreamWriter outputStreamWriter=null;
 		BufferedWriter bufferedWriter=null;
-		try {
-            String logContent=urlStr+","+value;
-			if(logFile.exists()){
-				outputStream=new FileOutputStream(logFile,true);
-			}else{
-				outputStream=new FileOutputStream(logFile);
-			}
-			outputStreamWriter=new OutputStreamWriter(outputStream);
-			bufferedWriter=new BufferedWriter(outputStreamWriter);
+		String logContent=urlStr+","+value;
+		ApplicationProperties.getWait2write().add(logContent);
+		if(ApplicationProperties.getWait2write().size()>=1000){
 			try {
-				bufferedWriter.write(logContent);
-				bufferedWriter.newLine();
-			} catch (IOException e) {
-				LOG.error("写入"+name+"文件错误1:",e);
-			}
-		} catch (FileNotFoundException e) {
-			LOG.error("写入"+name+"文件错误2:",e);
-		}finally {
-			try {
-				bufferedWriter.close();
-				outputStreamWriter.close();
-				outputStream.close();
-			} catch (IOException e) {
-				LOG.error("关闭写入"+name+"文件错误",e);
+				if(logFile.exists()){
+					outputStream=new FileOutputStream(logFile,true);
+				}else{
+					outputStream=new FileOutputStream(logFile);
+				}
+				outputStreamWriter=new OutputStreamWriter(outputStream);
+				bufferedWriter=new BufferedWriter(outputStreamWriter);
+				try {
+					bufferedWriter.write(logContent);
+					bufferedWriter.newLine();
+				} catch (IOException e) {
+					System.out.println("写入"+name+"文件错误1:");
+					e.printStackTrace();
+				}
+			} catch (FileNotFoundException e) {
+				System.out.println("写入"+name+"文件错误2:");
+				e.printStackTrace();
+			}finally {
+				try {
+					bufferedWriter.close();
+					outputStreamWriter.close();
+					outputStream.close();
+				} catch (IOException e) {
+					System.out.println("关闭写入"+name+"文件错误");
+					e.printStackTrace();
+				}
 			}
 		}
-		
 	}
 
 	public static int paseBingHtml(String entityString, String name) {

@@ -14,18 +14,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ForkJoinTask;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.bytedeco.javacpp.freenect;
-
 import intellif.Threads.ImageUrlThread;
 import intellif.entity.ApplicationProperties;
 import intellif.entity.QueryParams;
 
 public class DownloadUtil {
 	
-	private static Logger LOG = LogManager.getLogger(DownloadUtil.class);
 	
 	/**
 	 * 为每个人创建百度下载任务
@@ -35,7 +29,7 @@ public class DownloadUtil {
 		List<ForkJoinTask<Boolean>> taskList=new ArrayList<>();
 		//获取每个人的图片路径 
 		for(String name:persons){
-			LOG.error(name+":图片下载开始!");
+			System.out.println(name+":图片下载开始!");
 			//检查下载日志，载入已下载图片信息
 			if(checkLogInfo(name))
 				continue;
@@ -64,14 +58,16 @@ public class DownloadUtil {
 				        }
 						for(int i=0;i<taskList.size();i++){
 							taskList.get(i).join();
+							System.out.println("taskList:"+i+" 完成！");
 						}
+						taskList.clear();
 					}
 				}
 			}
 			
 			//下载结束清除
 			clear(taskList,name);
-			LOG.error(name+":图片下载结束！");
+			System.out.println(name+":图片下载结束！");
 		}	
 	}
 
