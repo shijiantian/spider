@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinTask;
 
 import intellif.Threads.ImageUrlThread;
@@ -26,7 +27,7 @@ public class DownloadUtil {
 	 */
 	public static void createBaiduDownloadTask() {
 		List<String> persons=ApplicationProperties.getStarsList();
-		List<ForkJoinTask<Boolean>> taskList=new ArrayList<>();
+		List<ForkJoinTask<String>> taskList=new ArrayList<ForkJoinTask<String>>();
 		//获取每个人的图片路径 
 		for(String name:persons){
 			System.out.println(name+":图片下载开始!");
@@ -57,8 +58,13 @@ public class DownloadUtil {
 				            taskList.add(ApplicationProperties.pool.submit(thread));
 				        }
 						for(int i=0;i<taskList.size();i++){
-							taskList.get(i).join();
-							System.out.println("taskList:"+i+" 完成！");
+							try {
+								System.out.println(taskList.get(i).get());
+							} catch (InterruptedException | ExecutionException e) {
+								System.out.println("线程异常：");
+								e.printStackTrace();
+							}
+							System.out.println("taskList:"+i+"完成！");
 						}
 						taskList.clear();
 					}
@@ -66,8 +72,8 @@ public class DownloadUtil {
 			}
 			
 			//下载结束清除
-			clear(taskList,name);
 			System.out.println(name+":图片下载结束！");
+			clear(taskList,name);
 		}	
 	}
 
@@ -139,7 +145,7 @@ public class DownloadUtil {
 		return isfinished;
 	}
 
-	private static void clear(List<ForkJoinTask<Boolean>> taskList, String name) {
+	private static void clear(List<ForkJoinTask<String>> taskList, String name) {
 		ApplicationProperties.getDownloadedMap().clear();
 		ApplicationProperties.getDownloadedSites().clear();
 		taskList.clear();
@@ -188,7 +194,7 @@ public class DownloadUtil {
 	 */
 	public static void createBingDownloadTask() {
 		List<String> persons=ApplicationProperties.getStarsList();
-		List<ForkJoinTask<Boolean>> taskList=new ArrayList<>();
+		List<ForkJoinTask<String>> taskList=new ArrayList<ForkJoinTask<String>>();
 		//获取每个人的图片路径 
 		for(String name:persons){
 			//获取图片链接

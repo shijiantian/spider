@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -68,6 +69,7 @@ public class CommonUtils {
 	 * @param queue 
 	 */
 	public static boolean parseBaiduImageUrl(String entityString, String picSize, String picColor, String queryExt, BlockingQueue<String> queue,String name) {
+		System.out.println("解析imageURl开始");
 		JSONObject entity=null;
 		try{
 			entity=JSONObject.fromObject(new String(entityString.getBytes(),"utf-8"));
@@ -134,7 +136,7 @@ public class CommonUtils {
 				}
 				//website未访问
 				if(isSiteDownloaded==null||isSiteDownloaded!=1){
-					queue.put(fromURLHost);
+					queue.offer(fromURLHost, 20, TimeUnit.MINUTES);
 //					downloadSite(fromURLHost,queryExt,picSize,picColor);
 				}
 			} catch (Throwable e) {
@@ -142,7 +144,7 @@ public class CommonUtils {
 				e.printStackTrace();
 			}
 		}
-		
+		System.out.println("解析imageURl结束");
 		return true;
 	}
 
@@ -166,6 +168,7 @@ public class CommonUtils {
 	}
 
 	private static void downloadFile(String urlStr,String fileName,String queryExt,String name){
+		System.out.println("下载开始！");
 		CloseableHttpClient httpClient=null;
 		OutputStream outstream=null;
 		CloseableHttpResponse response=null;
@@ -188,7 +191,7 @@ public class CommonUtils {
 
                 if(statusCode == 200) {
                 	ApplicationProperties.getDownloadedMap().put(urlStr, 1);
-                	write2File(name,urlStr,1);
+//                	write2File(name,urlStr,1);
                     //获取返回实例entity
                     HttpEntity entity=response.getEntity();
                     //输出
