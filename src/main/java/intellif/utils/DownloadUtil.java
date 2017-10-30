@@ -11,21 +11,29 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.TimeUnit;
 
-import intellif.Threads.ImageUrlThread;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import intellif.entity.ApplicationProperties;
 import intellif.entity.QueryParams;
 
+@Service
 public class DownloadUtil {
 	
+	@Autowired
+	private CommonUtils commonUtils;
 	
 	/**
 	 * 为每个人创建百度下载任务
 	 */
-	public static void createBaiduDownloadTask() {
+	public void createBaiduDownloadTask() {
 		List<String> persons=ApplicationProperties.getStarsList();
 		List<ForkJoinTask<String>> taskList=new ArrayList<ForkJoinTask<String>>();
 		//获取每个人的图片路径 
@@ -36,8 +44,8 @@ public class DownloadUtil {
 				continue;
 			ApplicationProperties.setFileNo(0);
 			loadHistory(name);
-//			int picNums=InitPropertiesUtils.getPicNums4Everyone(name);
-			int picNums=2000;			//获取一个人的图片总数，由于百度每个关键词图片数量不超过2000所以不在获取直接设置为2000
+			int picNums=InitPropertiesUtils.getPicNums4Everyone(name);
+//			int picNums=2000;			//获取一个人的图片总数，由于百度每个关键词图片数量不超过2000所以不在获取直接设置为2000
 //			int size=Runtime.getRuntime().availableProcessors()+3;//要开启的线程数量
 			int size=ApplicationProperties.getThreadNums();
 			final int picNum4Thread=picNums/size;  //每个线程要处理的数量
@@ -67,6 +75,8 @@ public class DownloadUtil {
 							System.out.println("taskList:"+i+"完成！");
 						}
 						taskList.clear();
+						ApplicationProperties.getWait2downloadqueue().clear();
+						ApplicationProperties.getDownloadedSites().clear();
 					}
 				}
 			}
@@ -81,39 +91,22 @@ public class DownloadUtil {
 	 * 将下载历史加载到内存中
 	 * @param name
 	 */
-	private static void loadHistory(String name) {
+	private void loadHistory(String name) {
 		String fileName=ApplicationProperties.getLogFileSavePath()+File.separator+name;
 		File historyFile=new File(fileName);
 		if(historyFile.exists()){
-			ConcurrentMap<String, Integer> downloadedMap=ApplicationProperties.getDownloadedMap();
-			FileInputStream inputStream=null;
-			BufferedReader reader=null;
-			try {
-				inputStream=new FileInputStream(historyFile);
-				reader=new BufferedReader(new InputStreamReader(inputStream));
-				String line=null;
-				int lineNo=0;
-				while ((line=reader.readLine())!=null) {
-					lineNo++;
-					int seperateIndex=line.lastIndexOf(",");
-					String key=line.substring(0, seperateIndex);
-					String value=line.substring(seperateIndex+1);
-					downloadedMap.put(key, Integer.parseInt(value));
-				}
-				ApplicationProperties.setFileNo(lineNo);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			String[] files=historyFile.list();
+			ApplicationProperties.setFileNo(files.length);
 		}
 		
 	}
 
 	/**
-	 * 检查该人图片是否已下载完成 已下载过返回true 为下载返回false
+	 * 检查该人图片是否已下载完成 已下载过返回true 未下载返回false
 	 * @param name
 	 * @return
 	 */
-	private static boolean checkLogInfo(String name) {
+	private boolean checkLogInfo(String name) {
 		boolean isfinished=false;
 		String fileName=ApplicationProperties.getFinishedPersons();
 		File file=new File(ApplicationProperties.getLogFileSavePath()+File.separator+fileName);
@@ -145,8 +138,8 @@ public class DownloadUtil {
 		return isfinished;
 	}
 
-	private static void clear(List<ForkJoinTask<String>> taskList, String name) {
-		ApplicationProperties.getDownloadedMap().clear();
+	private void clear(List<ForkJoinTask<String>> taskList, String name) {
+//		ApplicationProperties.getDownloadedMap().clear();
 		ApplicationProperties.getDownloadedSites().clear();
 		taskList.clear();
 		//写入已完成人员文件
@@ -159,7 +152,7 @@ public class DownloadUtil {
 		
 	}
 
-	public static void writeLine2File(String filePath, String name) {
+	public void writeLine2File(String filePath, String name) {
 		File finishedPersons=new File(filePath);
 		FileOutputStream outputStream=null;
 		BufferedWriter bufferedWriter=null;
@@ -192,7 +185,7 @@ public class DownloadUtil {
 	/**
 	 * 为每个人创建必应下载任务
 	 */
-	public static void createBingDownloadTask() {
+	public void createBingDownloadTask() {
 		List<String> persons=ApplicationProperties.getStarsList();
 		List<ForkJoinTask<String>> taskList=new ArrayList<ForkJoinTask<String>>();
 		//获取每个人的图片路径 
@@ -207,7 +200,7 @@ public class DownloadUtil {
 				params.setRn(30);
 				Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
 				String entityString=HttpUtils.sendGet(ApplicationProperties.getBing(), parameters,name,1);
-				resultNum=CommonUtils.paseBingHtml(entityString,name);
+				resultNum=commonUtils.paseBingHtml(entityString,name);
 				params.setPn(params.getPn()+params.getRn());
 			}while(resultNum>0);//待定
 			for(int i=0;i<taskList.size();i++){
@@ -215,5 +208,60 @@ public class DownloadUtil {
 			}
 			clear(taskList, name);
 		}	
+	}
+	
+	private class ImageUrlThread implements Callable<String> {
+		
+		private String keyword;
+		private int pn;
+		private int end;
+		private String picSize;
+		private String picColor;
+		private String name;
+			
+		public ImageUrlThread(String keyword,int pn,int end,String picSize,String picColor,String name) {
+			this.keyword=keyword;
+			this.pn=pn;
+			this.end=end;
+			this.picColor=picColor;
+			this.picSize=picSize;
+			this.name=name;
+		}
+
+		@Override
+		public String call() throws Exception {
+			BlockingQueue<String> queue=ApplicationProperties.getWait2downloadqueue();
+			QueryParams params=new QueryParams();
+			params.setType(2);
+			params.setPn(pn);
+			params.setKeyWord(keyword);
+			params.setRn(30);
+			params.setPicColor(picColor);
+			params.setPicSize(picSize);
+			do{
+				System.out.println("当前线程1："+Thread.currentThread().getName());
+				Map<String, String> parameters=QueryParamsUtils.getParamStr(params); //设置参数
+				String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,keyword,1);//发送请求
+				if(entityString!=null&&StringUtils.isNotBlank(entityString)){
+					try {
+						commonUtils.parseBaiduImageUrl(entityString,picSize,picColor,keyword,queue,name);//解析结果
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				while (queue.size()>0) {
+					System.out.println("当前线程2："+Thread.currentThread().getName()+"  "+"获取site");
+					String site = queue.poll(20,TimeUnit.MINUTES);
+					if(StringUtils.isNotBlank(site)){
+						System.out.println("当前线程2："+Thread.currentThread().getName()+"  "+site+"下载开始........!");
+						commonUtils.downloadSite(site,keyword,picSize,picColor,queue,name);
+						System.out.println("当前线程2："+Thread.currentThread().getName()+"  "+site+"下载结束........!");
+					}
+				}
+				System.out.println("当前线程1："+Thread.currentThread().getName()+" 翻页。");
+				params.setPn(params.getPn()+params.getRn());
+			}while(params.getPn()<end);
+			return "当前线程："+Thread.currentThread().getName()+"  结束返回。";
+		}
 	}
 }

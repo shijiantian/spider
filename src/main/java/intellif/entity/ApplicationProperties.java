@@ -26,10 +26,10 @@ public class ApplicationProperties {
 	private static Integer threadNums;
 	private static String[] specified;
 	
-	private static ConcurrentMap<String, Integer> downloadedMap=new ConcurrentHashMap<>();  //一下载图片  1成功 0失败
+//	private static ConcurrentMap<String, Integer> downloadedMap=new ConcurrentHashMap<>();  //一下载图片  1成功 0失败
 	private static ConcurrentMap<String, Integer> downloadedSites=new ConcurrentHashMap<>(); //某人已下载过的站 
 	private static BlockingQueue<String> wait2downloadqueue=new LinkedBlockingQueue<>();
-	private static List<String> wait2write=new ArrayList<>();
+//	private static List<String> wait2write=new ArrayList<>();
 	
 	private static List<String> picSize=new ArrayList<>();
 	private static List<String> picColor=new ArrayList<>();
@@ -79,12 +79,12 @@ public class ApplicationProperties {
 	public static void setFileNo(int fileNo) {
 		ApplicationProperties.fileNo = fileNo;
 	}
-	public synchronized static ConcurrentMap<String, Integer> getDownloadedMap() {
-		return downloadedMap;
-	}
-	public synchronized static void setDownloadedMap(ConcurrentMap<String, Integer> downloadedMap) {
-		ApplicationProperties.downloadedMap = downloadedMap;
-	}
+//	public synchronized static ConcurrentMap<String, Integer> getDownloadedMap() {
+//		return downloadedMap;
+//	}
+//	public synchronized static void setDownloadedMap(ConcurrentMap<String, Integer> downloadedMap) {
+//		ApplicationProperties.downloadedMap = downloadedMap;
+//	}
 	public static String getLogFileSavePath() {
 		return logFileSavePath;
 	}
@@ -151,12 +151,12 @@ public class ApplicationProperties {
 	public static void setSecondWords(List<String> secondWords) {
 		ApplicationProperties.secondWords = secondWords;
 	}
-	public static List<String> getWait2write() {
-		return wait2write;
-	}
-	public static void setWait2write(List<String> wait2write) {
-		ApplicationProperties.wait2write = wait2write;
-	}
+//	public static List<String> getWait2write() {
+//		return wait2write;
+//	}
+//	public static void setWait2write(List<String> wait2write) {
+//		ApplicationProperties.wait2write = wait2write;
+//	}
 	public static BlockingQueue<String> getWait2downloadqueue() {
 		return wait2downloadqueue;
 	}

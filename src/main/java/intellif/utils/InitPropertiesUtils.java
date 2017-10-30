@@ -10,17 +10,23 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import intellif.entity.ApplicationProperties;
 import intellif.entity.QueryParams;
 import net.sf.json.JSONObject;
 
+@Service
 public class InitPropertiesUtils {
+	
+	@Autowired
+	private CommonUtils commonUtils;
 	
 	/**
 	 * 读取配置文件
 	 */
-	public static void initProperties(){
+	public void initProperties(){
 		Properties properties=new Properties();
 		try {
 			FileInputStream proInput=new FileInputStream("application.properties");
@@ -78,7 +84,7 @@ public class InitPropertiesUtils {
 	 * @param area 
 	 * @param sex 
 	 */
-	public static void getStarsList(String sex, String area){
+	public void getStarsList(String sex, String area){
 		String[] specified=ApplicationProperties.getSpecified();
 		if(specified!=null&&specified.length>0){
 			List<String> specifiedList=Arrays.asList(specified);
@@ -95,7 +101,7 @@ public class InitPropertiesUtils {
 			do{
 				Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
 				String entityString=HttpUtils.sendGet(ApplicationProperties.getStarListUrl(), parameters,null,0);
-				subStarsList=CommonUtils.getStartListJson(entityString);
+				subStarsList=commonUtils.getStartListJson(entityString);
 				starsList.addAll(subStarsList);
 				params.setPn(params.getPn()+subStarsList.size());
 			}while(subStarsList.size()!=0);

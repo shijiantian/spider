@@ -5,20 +5,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import intellif.entity.ApplicationProperties;
+import intellif.utils.CommonUtils;
 import intellif.utils.DownloadUtil;
 import intellif.utils.InitPropertiesUtils;
 
 @Component
 public class DowloadJobs {
+	
+	@Autowired
+	private InitPropertiesUtils initPropertiesUtils;
+	@Autowired
+	private DownloadUtil downloadUtil;
 		
 	@Scheduled(fixedDelay=1 * 1000)
 	public void downloadJob(){
 		//读取配置文件
-		InitPropertiesUtils.initProperties();
+		initPropertiesUtils.initProperties();
 		List<String> sexlist=null;
 		List<String> arealist=null;
 		if(StringUtils.isBlank(ApplicationProperties.getSex())){
@@ -36,9 +43,9 @@ public class DowloadJobs {
 				for(String area:arealist){
 					setDownloadFilePath(sex,area);
 					//从百度获取名单
-					InitPropertiesUtils.getStarsList(sex,area);
+					initPropertiesUtils.getStarsList(sex,area);
 					//为每个人创建百度下载任务
-					DownloadUtil.createBaiduDownloadTask();
+					downloadUtil.createBaiduDownloadTask();
 				}
 			}
 		}else if(sexlist!=null&&arealist==null){
@@ -46,26 +53,26 @@ public class DowloadJobs {
 			for(String sex:sexlist){
 				setDownloadFilePath(sex,ApplicationProperties.getArea());
 				//从百度获取名单
-				InitPropertiesUtils.getStarsList(sex,ApplicationProperties.getArea());
+				initPropertiesUtils.getStarsList(sex,ApplicationProperties.getArea());
 				//为每个人创建百度下载任务
-				DownloadUtil.createBaiduDownloadTask();
+				downloadUtil.createBaiduDownloadTask();
 			}
 		}else if(sexlist==null&&arealist!=null){
 		//设置了性别则下载该性别下所有地区的明星
 			for(String area:arealist){
 				setDownloadFilePath(ApplicationProperties.getSex(),area);
 				//从百度获取名单
-				InitPropertiesUtils.getStarsList(ApplicationProperties.getSex(),area);
+				initPropertiesUtils.getStarsList(ApplicationProperties.getSex(),area);
 				//为每个人创建百度下载任务
-				DownloadUtil.createBaiduDownloadTask();
+				downloadUtil.createBaiduDownloadTask();
 			}
 		}else if(sexlist==null&&arealist==null){
 		//设置了性别和地区则下载该性别和地区下的明星
 			setDownloadFilePath(ApplicationProperties.getSex(),ApplicationProperties.getArea());
 			//从百度获取名单
-			InitPropertiesUtils.getStarsList(ApplicationProperties.getSex(),ApplicationProperties.getArea());
+			initPropertiesUtils.getStarsList(ApplicationProperties.getSex(),ApplicationProperties.getArea());
 			//为每个人创建百度下载任务
-			DownloadUtil.createBaiduDownloadTask();
+			downloadUtil.createBaiduDownloadTask();
 		}
 		System.out.println("全部下载完成..........");
 	}
