@@ -442,10 +442,10 @@
 		</repository>
 		<!-- <repository> <id>Public</id> <url>http://192.168.2.7:8081/nexus/content/repositories/public/</url>
 			</repository> -->
-		<repository>
-			<id>spring-releases</id>
-			<url>http://repo.spring.io/libs-release</url>
-		</repository>
+<!-- 		<repository> -->
+<!-- 			<id>spring-releases</id> -->
+<!-- 			<url>http://repo.spring.io/libs-release</url> -->
+<!-- 		</repository> -->
 		<!-- <repository> <id>Sonatype OSS Snapshot Repository</id> <url>http://oss.sonatype.org/content/repositories/snapshots</url> 
 			</repository> <repository> <id>oss-jfrog-artifactory</id> <name>oss-jfrog-artifactory-releases</name> 
 			<url>http://oss.jfrog.org/artifactory/oss-release-local</url> </repository> -->
