@@ -22,7 +22,7 @@ public class DowloadJobs {
 	@Autowired
 	private DownloadUtil downloadUtil;
 		
-	@Scheduled(fixedDelay=1 * 1000)
+	@Scheduled(fixedDelay=10 * 1000)
 	public void downloadJob(){
 		//读取配置文件
 		initPropertiesUtils.initProperties();

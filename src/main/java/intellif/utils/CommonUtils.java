@@ -1,12 +1,9 @@
 package intellif.utils;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -73,13 +71,11 @@ public class CommonUtils {
 	 * @param queue 
 	 */
 	public boolean parseBaiduImageUrl(String entityString, String picSize, String picColor, String queryExt, BlockingQueue<String> queue,String name) {
-		System.out.println("解析imageURl开始");
 		JSONObject entity=null;
 		try{
 			entity=JSONObject.fromObject(new String(entityString.getBytes(),"utf-8"));
 		}catch (Throwable e) {
 			entity=null;
-			System.out.println("解析返回json错误！"+entityString);
 			e.printStackTrace();
 		}
 		if(entity==null)
@@ -94,7 +90,6 @@ public class CommonUtils {
 			data=entity.getJSONArray("data");
 		} catch (Throwable e) {
 			data=null;
-			System.out.println("解析data数组失败！"+entityString);
 			e.printStackTrace();
 		}
 		entity=null;
@@ -157,11 +152,9 @@ public class CommonUtils {
 //					downloadSite(fromURLHost,queryExt,picSize,picColor);
 				}
 			} catch (Throwable e) {
-				System.out.println("下载图片错误!");
 				e.printStackTrace();
 			}
 		}
-		System.out.println("解析imageURl结束");
 		return true;
 	}
 
@@ -185,11 +178,16 @@ public class CommonUtils {
 	}
 
 	private void downloadFile(String urlStr,String fileName,String queryExt,String name){
-		System.out.println("下载开始！");
 		CloseableHttpClient httpClient=null;
 		OutputStream outstream=null;
 		CloseableHttpResponse response=null;
 		try {
+			RequestConfig defaultRequestConfig = RequestConfig.custom()
+  				  .setSocketTimeout(5*60*1000) // 数据传输的最长时间
+  				  .setConnectTimeout(5*60*1000) // 创建连接的最长时间
+  				  .setConnectionRequestTimeout(5*60*1000) // 从连接池中获取到连接的最长时间
+  				  .setStaleConnectionCheckEnabled(true)// 提交请求前测试连接是否可用
+  				  .build();
             httpClient=HttpClients.createDefault();
             URIBuilder uri=new URIBuilder(urlStr);
             
@@ -200,6 +198,7 @@ public class CommonUtils {
             hg.setHeader("Accept-Language","zh-CN,zh;q=0.8,en;q=0.6");
             hg.setHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36");
             hg.setHeader("Referer", ApplicationProperties.getBaiduReferer()+URLEncoder.encode(queryExt, "utf-8"));
+            hg.setConfig(defaultRequestConfig);
             //请求服务
             response = httpClient.execute(hg);
             if(response!=null){
@@ -217,18 +216,16 @@ public class CommonUtils {
                     outstream=new FileOutputStream(fileName);
                     entity.writeTo(outstream);
                     EntityUtils.consume(entity);
-                    System.out.println("下载成功！");
                 }else {
                     //输出
 //                	ApplicationProperties.getDownloadedMap().put(urlStr, 0);
                 	String d5=MD5.digest(urlStr);
                 	createFile(name,d5,"rm");
-                	System.out.println("下载失败！"+uri.toString());
                 } 
             }
             
 		} catch (Exception e) {
-			System.out.println("下载失败");
+			System.out.println("下载出错");
 			e.printStackTrace();
 		}finally {
 			try {
@@ -238,7 +235,6 @@ public class CommonUtils {
 					outstream.close();
 				httpClient.close();
 			} catch (IOException e) {
-				System.out.println("关闭下载失败");
 				e.printStackTrace();
 			}
 		}

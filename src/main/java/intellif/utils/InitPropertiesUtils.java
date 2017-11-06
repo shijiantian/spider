@@ -101,8 +101,10 @@ public class InitPropertiesUtils {
 			do{
 				Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
 				String entityString=HttpUtils.sendGet(ApplicationProperties.getStarListUrl(), parameters,null,0);
-				subStarsList=commonUtils.getStartListJson(entityString);
-				starsList.addAll(subStarsList);
+				if(StringUtils.isNotBlank(entityString)){
+					subStarsList=commonUtils.getStartListJson(entityString);
+					starsList.addAll(subStarsList);
+				}
 				params.setPn(params.getPn()+subStarsList.size());
 			}while(subStarsList.size()!=0);
 			ApplicationProperties.setStarsList(starsList);
