@@ -1,4 +1,4 @@
-package intellif.entity;
+package spider.entity;
 
 public class SiteQueryParams {
 	private String fromURLHost;

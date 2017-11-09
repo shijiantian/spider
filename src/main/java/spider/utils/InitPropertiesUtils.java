@@ -1,4 +1,4 @@
-package intellif.utils;
+package spider.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import intellif.entity.ApplicationProperties;
-import intellif.entity.QueryParams;
 import net.sf.json.JSONObject;
+import spider.entity.ApplicationProperties;
+import spider.entity.QueryParams;
 
 @Service
 public class InitPropertiesUtils {

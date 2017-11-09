@@ -1,4 +1,4 @@
-package intellif.utils;
+package spider.utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,10 +26,10 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.util.security.Credential.MD5;
 import org.springframework.stereotype.Service;
 
-import intellif.entity.ApplicationProperties;
-import intellif.entity.QueryParams;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import spider.entity.ApplicationProperties;
+import spider.entity.QueryParams;
 
 @Service
 public class CommonUtils {

@@ -1,11 +1,11 @@
-package intellif.Threads;
+package spider.Threads;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import intellif.entity.QueryParams;
-import intellif.utils.QueryParamsUtils;
+import spider.entity.QueryParams;
+import spider.utils.QueryParamsUtils;
 
 public class BingDownloadThread implements Callable<Boolean> {
 	private List<String> persons;

@@ -1,4 +1,4 @@
-package intellif.jobs;
+package spider.jobs;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,10 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import intellif.entity.ApplicationProperties;
-import intellif.utils.CommonUtils;
-import intellif.utils.DownloadUtil;
-import intellif.utils.InitPropertiesUtils;
+import spider.entity.ApplicationProperties;
+import spider.utils.DownloadUtil;
+import spider.utils.InitPropertiesUtils;
 
 @Component
 public class DowloadJobs {

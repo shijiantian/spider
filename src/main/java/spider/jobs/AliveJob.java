@@ -1,4 +1,4 @@
-package intellif.jobs;
+package spider.jobs;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

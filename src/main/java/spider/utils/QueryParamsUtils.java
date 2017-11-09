@@ -1,9 +1,9 @@
-package intellif.utils;
+package spider.utils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import intellif.entity.QueryParams;
+import spider.entity.QueryParams;
 
 public class QueryParamsUtils {
 	

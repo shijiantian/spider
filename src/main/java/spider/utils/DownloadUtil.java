@@ -1,4 +1,4 @@
-package intellif.utils;
+package spider.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,8 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import intellif.entity.ApplicationProperties;
-import intellif.entity.QueryParams;
+import spider.entity.ApplicationProperties;
+import spider.entity.QueryParams;
 
 @Service
 public class DownloadUtil {

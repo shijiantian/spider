@@ -1,4 +1,4 @@
-package intellif.entity;
+package spider.entity;
 
 import java.util.ArrayList;
 import java.util.List;
