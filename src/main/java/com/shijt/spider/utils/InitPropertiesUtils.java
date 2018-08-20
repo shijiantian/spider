@@ -29,7 +29,7 @@ public class InitPropertiesUtils {
 	public void initProperties(){
 		Properties properties=new Properties();
 		try {
-			FileInputStream proInput=new FileInputStream("src/main/resources/application.properties");
+			FileInputStream proInput=new FileInputStream("application.properties");
 //			properties.load(proInput);
 			properties.load(new InputStreamReader(proInput, "utf-8"));
 			proInput.close();
