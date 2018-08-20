@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class DowloadJobs {
+public class DownloadJobs {
 	
 	@Autowired
 	private InitPropertiesUtils initPropertiesUtils;
