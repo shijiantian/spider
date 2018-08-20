@@ -182,34 +182,6 @@ public class DownloadUtil {
 		
 	}
 
-	/**
-	 * 为每个人创建必应下载任务
-	 */
-	public void createBingDownloadTask() {
-		List<String> persons=ApplicationProperties.getStarsList();
-		List<ForkJoinTask<String>> taskList=new ArrayList<ForkJoinTask<String>>();
-		//获取每个人的图片路径 
-		for(String name:persons){
-			//获取图片链接
-			QueryParams params=new QueryParams();
-			params.setType(3);
-			params.setPn(0);
-			params.setKeyWord(name);
-			int resultNum=0;
-			do{
-				params.setRn(30);
-				Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
-				String entityString=HttpUtils.sendGet(ApplicationProperties.getBing(), parameters,name,1);
-				resultNum=commonUtils.paseBingHtml(entityString,name);
-				params.setPn(params.getPn()+params.getRn());
-			}while(resultNum>0);//待定
-			for(int i=0;i<taskList.size();i++){
-				taskList.get(i).join();
-			}
-			clear(taskList, name);
-		}	
-	}
-	
 	private class ImageUrlThread implements Callable<String> {
 		
 		private String keyword;

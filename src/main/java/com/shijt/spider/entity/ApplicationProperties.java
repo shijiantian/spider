@@ -15,7 +15,6 @@ public class ApplicationProperties {
 	private static String area;//地区
 	private static String sex;//性别
 	private static String baidu;//百度图片
-	private static String bing;//必应图片
 	private static List<String> starsList;//明星名单
 	private static String downloadFileParentPath;//下载文件父路径
 	private static String downloadFilePath;//下载文件完整保存路径
@@ -91,12 +90,7 @@ public class ApplicationProperties {
 	public static void setLogFileSavePath(String logFileSavePath) {
 		ApplicationProperties.logFileSavePath = logFileSavePath;
 	}
-	public static String getBing() {
-		return bing;
-	}
-	public static void setBing(String bing) {
-		ApplicationProperties.bing = bing;
-	}
+
 	public synchronized static ConcurrentMap<String, Integer> getDownloadedSites() {
 		return downloadedSites;
 	}

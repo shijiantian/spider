@@ -42,44 +42,76 @@ public class InitPropertiesUtils {
 		if(StringUtils.isNotBlank(properties.getProperty("sex")))
 			ApplicationProperties.setSex(properties.getProperty("sex"));
 		ApplicationProperties.setBaidu(properties.getProperty("baidu"));
-		ApplicationProperties.setBing(properties.getProperty("bing"));
 		ApplicationProperties.setDownloadFileParentPath(properties.getProperty("downloadFileParentPath"));
 		ApplicationProperties.setLogFileSavePath(properties.getProperty("logFileSavePath"));
 		ApplicationProperties.setBaiduReferer(properties.getProperty("baiduReferer"));
 		ApplicationProperties.setFinishedPersons(properties.getProperty("finishedPersons"));
 		ApplicationProperties.setThreadNums(Integer.valueOf(properties.getProperty("threadNum", "1")));
-		ApplicationProperties.getPicSize().add("");
-		ApplicationProperties.getPicSize().add("9");
-		ApplicationProperties.getPicSize().add("3");
-		ApplicationProperties.getPicSize().add("2");
-		ApplicationProperties.getPicSize().add("1");
-		ApplicationProperties.getPicSize().add("0");
-		ApplicationProperties.getPicColor().add("");
-		ApplicationProperties.getPicColor().add("1");
-		ApplicationProperties.getPicColor().add("256");
-		ApplicationProperties.getPicColor().add("2");
-		ApplicationProperties.getPicColor().add("4");
-		ApplicationProperties.getPicColor().add("32");
-		ApplicationProperties.getPicColor().add("64");
-		ApplicationProperties.getPicColor().add("8");
-		ApplicationProperties.getPicColor().add("16");
-		ApplicationProperties.getPicColor().add("128");
-		ApplicationProperties.getPicColor().add("1024");
-		ApplicationProperties.getPicColor().add("512");
-		ApplicationProperties.getPicColor().add("2048");
+
+		setPicSiz(properties);
+
+		setPicColor(properties);
+
 		String specified=properties.getProperty("specified");
 		if(StringUtils.isNotBlank(specified)){
 			ApplicationProperties.setSpecified(specified.split(","));
 		}
+
+		ApplicationProperties.getSecondWords().add("empty");
 		String secondWords=properties.getProperty("secondWords");
 		if(StringUtils.isNotBlank(secondWords)){
 			List<String> secondWordsList=Arrays.asList(secondWords.split(","));
-			ApplicationProperties.getSecondWords().add("empty");
 			ApplicationProperties.getSecondWords().addAll(secondWordsList);
 		}
 	}
-	
-	/**
+
+    /**
+     * 设置图片颜色条件
+     * @param properties
+     */
+    private void setPicColor(Properties properties) {
+        String picColors=properties.getProperty("picColor");
+        if(StringUtils.isBlank(picColors)){
+            ApplicationProperties.getPicColor().add("");
+            ApplicationProperties.getPicColor().add("1");
+            ApplicationProperties.getPicColor().add("256");
+            ApplicationProperties.getPicColor().add("2");
+            ApplicationProperties.getPicColor().add("4");
+            ApplicationProperties.getPicColor().add("32");
+            ApplicationProperties.getPicColor().add("64");
+            ApplicationProperties.getPicColor().add("8");
+            ApplicationProperties.getPicColor().add("16");
+            ApplicationProperties.getPicColor().add("128");
+            ApplicationProperties.getPicColor().add("1024");
+            ApplicationProperties.getPicColor().add("512");
+            ApplicationProperties.getPicColor().add("2048");
+        }else{
+            List<String> picColorList=Arrays.asList(picColors.split(","));
+            ApplicationProperties.getPicColor().addAll(picColorList);
+        }
+
+    }
+
+    /**
+     * 设置图片尺寸条件
+     * @param properties
+     */
+    private void setPicSiz(Properties properties) {
+        String picSizes=properties.getProperty("picSize");
+        if(StringUtils.isBlank(picSizes)){
+            ApplicationProperties.getPicSize().add("");
+            ApplicationProperties.getPicSize().add("9");
+            ApplicationProperties.getPicSize().add("3");
+            ApplicationProperties.getPicSize().add("2");
+            ApplicationProperties.getPicSize().add("1");
+            ApplicationProperties.getPicSize().add("0");
+        }else{
+            List<String> picSizeList=Arrays.asList(picSizes.split(","));
+            ApplicationProperties.getPicSize().addAll(picSizeList);
+        }
+    }
+
+    /**
 	 * 从百度获取明星名单
 	 * @param area 
 	 * @param sex 

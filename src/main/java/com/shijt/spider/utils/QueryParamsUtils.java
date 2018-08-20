@@ -61,19 +61,7 @@ public class QueryParamsUtils {
 			params.put("rn",""+queryParams.getRn());//搜索结果显示条数，缺省设置rn=10，取值范围:10-100
 			params.put("gsm","1e");
 			break;
-		case 3:
-			params.put("q",queryParams.getKeyWord());
-			params.put("first",""+queryParams.getPn());
-			params.put("count",""+queryParams.getRn());
-			params.put("relo","2");
-			params.put("relp","10");
-			params.put("lostate","c");
-			params.put("mmasync","1");
-			params.put("dgState","c*9_y*1182s1065s1146s1034s970s1014s1020s1051s1177_i*38_w*200");
-			params.put("IG","A81D0C924FFD433CB8684FA28A335D2E");
-			params.put("SFX","2");
-			params.put("iid","images.5753");
-			break;
+
 		default:
 			
 			break;

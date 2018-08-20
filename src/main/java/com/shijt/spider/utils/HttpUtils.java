@@ -33,8 +33,7 @@ public class HttpUtils {
      * @param parameters 
      *            请求参数，Json类型�? 
 	 * @param queryWord 
-	 * @param parameters2 
-     * @return 远程响应结果 
+     * @return 远程响应结果
 	 * @throws IOException 
 	 * @throws URISyntaxException 
      */  
@@ -78,7 +77,7 @@ public class HttpUtils {
 				}
                 entityString =sb.toString();
                 //输出
-                System.out.println("请求成功!");
+                System.out.println("请求成功! url="+uri.toString());
                 EntityUtils.consume(entity);
             }else {
             	System.out.println("请求失败！"+uri.toString());
