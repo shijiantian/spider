@@ -1,4 +1,4 @@
-package spider.entity;
+package com.shijt.spider.entity;
 
 public class SiteQueryParams {
 	private String fromURLHost;

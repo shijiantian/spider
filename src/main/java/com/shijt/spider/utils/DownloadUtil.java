@@ -1,4 +1,4 @@
-package spider.utils;
+package com.shijt.spider.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,8 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import spider.entity.ApplicationProperties;
-import spider.entity.QueryParams;
+import com.shijt.spider.entity.ApplicationProperties;
+import com.shijt.spider.entity.QueryParams;
 
 @Service
 public class DownloadUtil {
@@ -35,8 +35,6 @@ public class DownloadUtil {
 	 */
 	public void createBaiduDownloadTask() {
 		List<String> persons=ApplicationProperties.getStarsList();
-		if(persons==null||persons.isEmpty())
-			return;
 		List<ForkJoinTask<String>> taskList=new ArrayList<ForkJoinTask<String>>();
 		//获取每个人的图片路径 
 		for(String name:persons){
@@ -47,8 +45,6 @@ public class DownloadUtil {
 			ApplicationProperties.setFileNo(0);
 			loadHistory(name);
 			int picNums=InitPropertiesUtils.getPicNums4Everyone(name);
-			if(picNums==0)
-				break;
 //			int picNums=2000;			//获取一个人的图片总数，由于百度每个关键词图片数量不超过2000所以不在获取直接设置为2000
 //			int size=Runtime.getRuntime().availableProcessors()+3;//要开启的线程数量
 			int size=ApplicationProperties.getThreadNums();
@@ -234,43 +230,37 @@ public class DownloadUtil {
 
 		@Override
 		public String call() throws Exception {
-			try {
-				BlockingQueue<String> queue=ApplicationProperties.getWait2downloadqueue();
-				QueryParams params=new QueryParams();
-				params.setType(2);
-				params.setPn(pn);
-				params.setKeyWord(keyword);
-				params.setRn(30);
-				params.setPicColor(picColor);
-				params.setPicSize(picSize);
-				do{
-					System.out.println("当前线程1："+Thread.currentThread().getName());
-					Map<String, String> parameters=QueryParamsUtils.getParamStr(params); //设置参数
-					String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,keyword,1);//发送请求
-					if(entityString!=null&&StringUtils.isNotBlank(entityString)){
-						try {
-							commonUtils.parseBaiduImageUrl(entityString,picSize,picColor,keyword,queue,name);//解析结果
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+			BlockingQueue<String> queue=ApplicationProperties.getWait2downloadqueue();
+			QueryParams params=new QueryParams();
+			params.setType(2);
+			params.setPn(pn);
+			params.setKeyWord(keyword);
+			params.setRn(30);
+			params.setPicColor(picColor);
+			params.setPicSize(picSize);
+			do{
+				System.out.println("当前线程1："+Thread.currentThread().getName());
+				Map<String, String> parameters=QueryParamsUtils.getParamStr(params); //设置参数
+				String entityString=HttpUtils.sendGet(ApplicationProperties.getBaidu(), parameters,keyword,1);//发送请求
+				if(entityString!=null&&StringUtils.isNotBlank(entityString)){
+					try {
+						commonUtils.parseBaiduImageUrl(entityString,picSize,picColor,keyword,queue,name);//解析结果
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-					while (queue.size()>0) {
-						String site = queue.poll(3,TimeUnit.SECONDS);
-						if(StringUtils.isNotBlank(site)){
-							commonUtils.downloadSite(site,keyword,picSize,picColor,queue,name);
-						}else{
-							break;
-						}
+				}
+				while (queue.size()>0) {
+					System.out.println("当前线程2："+Thread.currentThread().getName()+"  "+"获取site");
+					String site = queue.poll(20,TimeUnit.MINUTES);
+					if(StringUtils.isNotBlank(site)){
+						System.out.println("当前线程2："+Thread.currentThread().getName()+"  "+site+"下载开始........!");
+						commonUtils.downloadSite(site,keyword,picSize,picColor,queue,name);
+						System.out.println("当前线程2："+Thread.currentThread().getName()+"  "+site+"下载结束........!");
 					}
-					params.setPn(params.getPn()+params.getRn());
-					System.out.println("当前线程1："+Thread.currentThread().getName()+" 翻页。");
-				}while(params.getPn()<end);
-				System.out.println("当前线程1："+Thread.currentThread().getName()+" 线程结束");
-			} catch (Throwable e) {
-				System.out.println("线程出错");
-				e.printStackTrace();
-			}
-			
+				}
+				System.out.println("当前线程1："+Thread.currentThread().getName()+" 翻页。");
+				params.setPn(params.getPn()+params.getRn());
+			}while(params.getPn()<end);
 			return "当前线程："+Thread.currentThread().getName()+"  结束返回。";
 		}
 	}

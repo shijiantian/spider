@@ -1,4 +1,4 @@
-package spider.entity;
+package com.shijt.spider.entity;
 
 public class QueryParams {
 	private int type;//1获取名单  2获取图片路径与数量等信息 3 必应参数

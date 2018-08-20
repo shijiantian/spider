@@ -1,4 +1,4 @@
-package spider.utils;
+package com.shijt.spider.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.shijt.spider.entity.ApplicationProperties;
+import com.shijt.spider.entity.QueryParams;
 import net.sf.json.JSONObject;
-import spider.entity.ApplicationProperties;
-import spider.entity.QueryParams;
 
 @Service
 public class InitPropertiesUtils {
@@ -29,7 +29,7 @@ public class InitPropertiesUtils {
 	public void initProperties(){
 		Properties properties=new Properties();
 		try {
-			FileInputStream proInput=new FileInputStream("application.properties");
+			FileInputStream proInput=new FileInputStream("src/main/resources/application.properties");
 //			properties.load(proInput);
 			properties.load(new InputStreamReader(proInput, "utf-8"));
 			proInput.close();
@@ -101,10 +101,8 @@ public class InitPropertiesUtils {
 			do{
 				Map<String, String> parameters=QueryParamsUtils.getParamStr(params);
 				String entityString=HttpUtils.sendGet(ApplicationProperties.getStarListUrl(), parameters,null,0);
-				if(StringUtils.isNotBlank(entityString)){
-					subStarsList=commonUtils.getStartListJson(entityString);
-					starsList.addAll(subStarsList);
-				}
+				subStarsList=commonUtils.getStartListJson(entityString);
+				starsList.addAll(subStarsList);
 				params.setPn(params.getPn()+subStarsList.size());
 			}while(subStarsList.size()!=0);
 			ApplicationProperties.setStarsList(starsList);

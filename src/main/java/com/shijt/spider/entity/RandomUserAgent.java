@@ -1,4 +1,4 @@
-package spider.entity;
+package com.shijt.spider.entity;
 
 import java.util.Random;
 

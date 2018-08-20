@@ -1,9 +1,9 @@
-package spider.utils;
+package com.shijt.spider.utils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import spider.entity.QueryParams;
+import com.shijt.spider.entity.QueryParams;
 
 public class QueryParamsUtils {
 	

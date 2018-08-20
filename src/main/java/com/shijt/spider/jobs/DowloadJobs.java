@@ -1,17 +1,16 @@
-package spider.jobs;
+package com.shijt.spider.jobs;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.shijt.spider.entity.ApplicationProperties;
+import com.shijt.spider.utils.DownloadUtil;
+import com.shijt.spider.utils.InitPropertiesUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import spider.entity.ApplicationProperties;
-import spider.utils.DownloadUtil;
-import spider.utils.InitPropertiesUtils;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class DowloadJobs {
@@ -21,7 +20,7 @@ public class DowloadJobs {
 	@Autowired
 	private DownloadUtil downloadUtil;
 		
-	@Scheduled(fixedDelay=10 * 1000)
+	@Scheduled(fixedDelay=1 * 1000)
 	public void downloadJob(){
 		//读取配置文件
 		initPropertiesUtils.initProperties();
